@@ -65,29 +65,46 @@ function MysteryVisual({ variant = 'flou', height = 186, big = false }) {
 }
 
 function MysteryCard({ offer, variant, onOpen, big = false }) {
+  // `big` = rendered in the 2-column search grid (narrow). There the wide
+  // "Commander" button doesn't fit, so we use the compact circular "+" like the
+  // other grid cards. `false` = wide home rail card (286px) with full button.
   return (
     <div onClick={() => onOpen(offer)} style={{ width: big ? '100%' : 286, flexShrink: 0, cursor: 'pointer',
-      background: K.paper, borderRadius: 22, overflow: 'hidden', border: `1px solid ${K.hair}`,
-      boxShadow: '0 10px 26px rgba(20,40,30,0.08)' }}>
+      background: K.paper, borderRadius: big ? 18 : 22, overflow: 'hidden', border: `1px solid ${K.hair}`,
+      boxShadow: big ? '0 6px 16px rgba(20,40,30,0.06)' : '0 10px 26px rgba(20,40,30,0.08)',
+      display: 'flex', flexDirection: 'column' }}>
       <div style={{ position: 'relative' }}>
-        <MysteryVisual variant={variant} height={big ? 210 : 178} big={big} />
-        <div style={{ position: 'absolute', top: 11, left: 11 }}>
-          <Chip tone="gold" icon="star">5★ Mystère</Chip>
+        <MysteryVisual variant={variant} height={big ? 124 : 178} />
+        <div style={{ position: 'absolute', top: big ? 9 : 11, left: big ? 9 : 11 }}>
+          <Chip tone="gold" icon="star" style={big ? { height: 21, fontSize: 10.5 } : {}}>5★ Mystère</Chip>
         </div>
-        <div style={{ position: 'absolute', top: 11, right: 11 }}>
-          <Chip tone="eco" icon="leaf">Anti-gaspi</Chip>
-        </div>
+        {!big && (
+          <div style={{ position: 'absolute', top: 11, right: 11 }}>
+            <Chip tone="eco" icon="leaf">Anti-gaspi</Chip>
+          </div>
+        )}
       </div>
-      <div style={{ padding: 15 }}>
-        <h3 style={{ margin: '0 0 5px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17, letterSpacing: -0.3, color: K.ink }}>{offer.teaser}</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 11, fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Icon name="clock" size={13} stroke={2} />{offer.window}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Icon name="pin" size={13} stroke={2} />{offer.dist} km</span>
-        </div>
-        <div style={{ marginBottom: 12 }}><Portions left={offer.portions} total={offer.total} /></div>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <Price from={offer.from} original={offer.original} />
-          <Btn kind="primary" size="sm" iconR="arrowR">Commander</Btn>
+      <div style={{ padding: big ? '11px 12px 13px' : 15, display: 'flex', flexDirection: 'column', flex: 1 }}>
+        <h3 style={{ margin: big ? '0 0 9px' : '0 0 5px', fontFamily: FONT_DISPLAY, fontWeight: 700,
+          fontSize: big ? 14 : 17, lineHeight: big ? 1.15 : 1.2, letterSpacing: -0.2, color: K.ink,
+          ...(big ? { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', minHeight: 33 } : {}) }}>{offer.teaser}</h3>
+        {!big && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 11, fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap' }}><Icon name="clock" size={13} stroke={2} />{offer.window}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, whiteSpace: 'nowrap' }}><Icon name="pin" size={13} stroke={2} />{offer.dist} km</span>
+          </div>
+        )}
+        <div style={{ marginBottom: big ? 10 : 12, marginTop: big ? 'auto' : 0 }}><Portions left={offer.portions} total={offer.total} /></div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8 }}>
+          <Price from={offer.from} original={offer.original} size={big ? 'sm' : 'md'} />
+          {big ? (
+            <button onClick={(e) => { e.stopPropagation(); onOpen(offer); }} style={{ width: 34, height: 34, borderRadius: '50%', border: 'none',
+              background: K.forest, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+              <Icon name="plus" size={18} stroke={2.4} />
+            </button>
+          ) : (
+            <Btn kind="primary" size="sm" iconR="arrowR">Commander</Btn>
+          )}
         </div>
       </div>
     </div>
