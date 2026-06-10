@@ -134,7 +134,7 @@ const iconBtnGlass = { width: 40, height: 40, borderRadius: 12, border: '1px sol
 
 function HomeHeader({ onSearch }) {
   return (
-    <div style={{ padding: 'calc(env(safe-area-inset-top, 0px) + 52px) 18px 16px', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forest} 62%, ${K.forest})`,
+    <div style={{ padding: 'max(env(safe-area-inset-top, 0px), 52px) 18px 16px', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forest} 62%, ${K.forest})`,
       borderRadius: '0 0 26px 26px', position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', top: -40, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(226,193,115,0.12)' }} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -255,7 +255,7 @@ export function SearchScreen({ onOpen, mysteryVariant }) {
   else if (cat === 'Pâtisseries') results = PASTRY;
   if (q) results = results.filter((o) => (o.teaser + (o.source || '')).toLowerCase().includes(q.toLowerCase()));
   return (
-    <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 56px)' }}>
+    <div style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 56px)' }}>
       <div style={{ padding: '0 18px 8px' }}>
         <h1 style={{ margin: '0 0 14px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Rechercher</h1>
         <div style={{ height: 50, borderRadius: 15, background: K.paper, border: `1px solid ${K.hair}`, display: 'flex', alignItems: 'center', gap: 10, padding: '0 15px' }}>
@@ -290,7 +290,7 @@ function TopBar({ onBack, light = false, title, onShare }) {
   const btn = { width: 40, height: 40, borderRadius: 12, border: `1px solid ${bd}`, background: bg, color: c,
     display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)' };
   return (
-    <div style={{ position: 'absolute', top: 'calc(env(safe-area-inset-top, 0px) + 52px)', left: 0, right: 0, zIndex: 30, display: 'flex', alignItems: 'center',
+    <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top, 0px), 52px)', left: 0, right: 0, zIndex: 30, display: 'flex', alignItems: 'center',
       justifyContent: 'space-between', padding: '0 16px' }}>
       <button onClick={onBack} style={btn}><Icon name="chevL" size={20} stroke={2.3} /></button>
       {title && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: c }}>{title}</span>}
@@ -448,7 +448,7 @@ export function PaymentScreen({ cart, onBack, onConfirm }) {
   const meals = offer.from * qty;
   const total = meals + DELIVERY_FEE;
   return (
-    <div style={{ position: 'relative', paddingTop: 'calc(env(safe-area-inset-top, 0px) + 92px)', paddingBottom: 116, minHeight: '100%' }}>
+    <div style={{ position: 'relative', paddingTop: 'max(env(safe-area-inset-top, 0px), 92px)', paddingBottom: 116, minHeight: '100%' }}>
       <TopBar onBack={onBack} title="Paiement" />
 
       {/* delivery to */}
@@ -528,7 +528,7 @@ export function ConfirmScreen({ cart, pay, total, onTrack, onHome }) {
   const [orderNo] = React.useState(() => 'KN-' + Math.floor(2000 + Math.random() * 7999));
   return (
     <div style={{ minHeight: '100%', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forestDeep} 46%, ${K.cream} 46%, ${K.cream} 100%)`,
-      paddingTop: 'calc(env(safe-area-inset-top, 0px) + 76px)', paddingBottom: 120, position: 'relative' }}>
+      paddingTop: 'max(env(safe-area-inset-top, 0px), 76px)', paddingBottom: 120, position: 'relative' }}>
       {/* success head */}
       <div style={{ textAlign: 'center', padding: '0 24px', color: '#fff' }}>
         <div className="kpop" style={{ width: 78, height: 78, borderRadius: '50%', margin: '0 auto 16px',
@@ -620,7 +620,7 @@ export function ProfileScreen({ onOpenOrder, onPartner }) {
     { icon: 'info', label: 'Aide & contact', sub: 'WhatsApp · 24/7' },
   ];
   return (
-    <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 56px)', paddingBottom: 24 }}>
+    <div style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 56px)', paddingBottom: 24 }}>
       {/* header */}
       <div style={{ padding: '0 18px 18px' }}>
         <h1 style={{ margin: '0 0 16px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Profil</h1>
@@ -727,7 +727,7 @@ export function PartnerScreen({ onBack, embedded = false }) {
       {!embedded && <TopBar onBack={onBack} light />}
       {/* hero */}
       <div style={{ position: 'relative',
-        padding: `calc(env(safe-area-inset-top, 0px) + ${embedded ? 76 : 104}px) 22px 26px`, overflow: 'hidden',
+        padding: `max(env(safe-area-inset-top, 0px), ${embedded ? 76 : 104}px) 22px 26px`, overflow: 'hidden',
         background: `linear-gradient(160deg, ${K.forest} 0%, ${K.forestDeep} 100%)` }}>
         <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(226,193,115,0.1)' }} />
         <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: 1.6, color: K.goldSoft, textTransform: 'uppercase' }}>Espace Partenaire · B2B</span>
@@ -819,7 +819,7 @@ export function PartnerScreen({ onBack, embedded = false }) {
 // ── Orders tab ────────────────────────────────────────────────
 export function OrdersScreen() {
   return (
-    <div style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 56px)', paddingBottom: 24 }}>
+    <div style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 56px)', paddingBottom: 24 }}>
       <div style={{ padding: '0 18px' }}>
         <h1 style={{ margin: '0 0 16px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Commandes</h1>
       </div>
