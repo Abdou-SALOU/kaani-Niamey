@@ -25,9 +25,9 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Build (base = /kaani-niamey/)
+      - name: Build (base = /kaani-Niamey/)
         env:
-          KAANI_BASE: /kaani-niamey/
+          KAANI_BASE: /kaani-Niamey/
         run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
