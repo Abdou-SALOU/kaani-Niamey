@@ -8,6 +8,14 @@ préparés le jour même, dont l'établissement n'est dévoilé qu'à la livrais
 > Une seule base de code qui tourne **sur PC et sur iPhone**, installable depuis le
 > navigateur (« Ajouter à l'écran d'accueil »), avec fonctionnement hors-ligne.
 
+## 🌍 En ligne
+
+**https://abdou-salou.github.io/kaani-Niamey/**
+
+Déployé automatiquement sur **GitHub Pages** à chaque `git push` sur `main`
+(workflow `.github/workflows/deploy.yml`). Ouvrez le lien dans Safari sur iPhone →
+Partager → « Sur l'écran d'accueil » pour l'installer.
+
 ---
 
 ## Lancer en local (développement)
