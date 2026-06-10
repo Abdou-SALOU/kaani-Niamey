@@ -1,0 +1,2306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kaani · Anti-gaspillage Premium · Niamey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(120% 90% at 50% 0%, #14352a 0%, #0c241c 60%, #081a14 100%);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    padding: 24px;
+  }
+  #root { display: flex; align-items: center; justify-content: center; }
+
+  /* hide scrollbars on horizontal rails + body scroll */
+  .hscroll::-webkit-scrollbar { display: none; }
+  .hscroll { -ms-overflow-style: none; scrollbar-width: none; }
+  .kscroll::-webkit-scrollbar { width: 0; }
+  .kscroll { scrollbar-width: none; }
+
+  input::placeholder { color: #b3ad9d; }
+  button { -webkit-tap-highlight-color: transparent; font-family: inherit; }
+
+  /* screen transitions — transform-only so a throttled/paused frame never hides content */
+  @keyframes kfade { from { transform: translateY(8px); } to { transform: none; } }
+  .kfade { animation: kfade .34s ease; }
+  @keyframes kover { from { transform: translateX(16px); } to { transform: none; } }
+  .kover { animation: kover .30s cubic-bezier(.22,.7,.3,1); }
+  @keyframes kpop { 0% { transform: scale(.4); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
+  .kpop { animation: kpop .5s cubic-bezier(.2,.8,.3,1.2); }
+  @keyframes kdot { 0%,100% { opacity: 1; } 50% { opacity: .25; } }
+  .kdot { animation: kdot 1.3s ease-in-out infinite; }
+  @keyframes kfloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+  .kfloat { animation: kfloat 2.4s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kfade, .kover, .kpop, .kfloat, .kdot { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" data-module="frames/ios-frame.jsx">
+// @ds-adherence-ignore -- omelette starter scaffold (raw elements/hex/px by design)
+
+/* BEGIN USAGE */
+// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
+// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
+// Exports (to window): IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
+//
+// Usage — wrap your screen content in <IOSDevice> to get the bezel, status bar
+// and home indicator (props: title, dark, keyboard):
+//
+//   <IOSDevice title="Settings">
+//     ...your screen content...
+//   </IOSDevice>
+//   <IOSDevice dark title="Search" keyboard>…</IOSDevice>
+/* END USAGE */
+
+// ─────────────────────────────────────────────────────────────
+// Status bar
+// ─────────────────────────────────────────────────────────────
+function IOSStatusBar({ dark = false, time = '9:41' }) {
+  const c = dark ? '#fff' : '#000';
+  return (
+    <div style={{
+      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
+      padding: '21px 24px 19px', boxSizing: 'border-box',
+      position: 'relative', zIndex: 20, width: '100%',
+    }}>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
+        <span style={{
+          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
+          fontSize: 17, lineHeight: '22px', color: c,
+        }}>{time}</span>
+      </div>
+      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
+        <svg width="19" height="12" viewBox="0 0 19 12">
+          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
+          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
+          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
+          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
+        </svg>
+        <svg width="17" height="12" viewBox="0 0 17 12">
+          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
+          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
+          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
+        </svg>
+        <svg width="27" height="13" viewBox="0 0 27 13">
+          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
+          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
+          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Liquid glass pill — blur + tint + shine
+// ─────────────────────────────────────────────────────────────
+function IOSGlassPill({ children, dark = false, style = {} }) {
+  return (
+    <div style={{
+      height: 44, minWidth: 44, borderRadius: 9999,
+      position: 'relative', overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      boxShadow: dark
+        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
+        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
+      ...style,
+    }}>
+      {/* blur + tint */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
+      }} />
+      {/* shine */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 9999,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Navigation bar — glass pills + large title
+// ─────────────────────────────────────────────────────────────
+function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
+  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
+  const text = dark ? '#fff' : '#000';
+  const pillIcon = (content) => (
+    <IOSGlassPill dark={dark}>
+      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {content}
+      </div>
+    </IOSGlassPill>
+  );
+  return (
+    <div style={{
+      display: 'flex', flexDirection: 'column', gap: 10,
+      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px',
+      }}>
+        {/* back chevron */}
+        {pillIcon(
+          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
+            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+        {/* trailing ellipsis */}
+        {trailingIcon && pillIcon(
+          <svg width="22" height="6" viewBox="0 0 22 6">
+            <circle cx="3" cy="3" r="2.5" fill={muted}/>
+            <circle cx="11" cy="3" r="2.5" fill={muted}/>
+            <circle cx="19" cy="3" r="2.5" fill={muted}/>
+          </svg>
+        )}
+      </div>
+      {/* large title */}
+      <div style={{
+        padding: '0 16px',
+        fontFamily: '-apple-system, system-ui',
+        fontSize: 34, fontWeight: 700, lineHeight: '41px',
+        color: text, letterSpacing: 0.4,
+      }}>{title}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Grouped list (inset card, r:26) + row (52px)
+// ─────────────────────────────────────────────────────────────
+function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
+  const text = dark ? '#fff' : '#000';
+  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
+  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', minHeight: 52,
+      padding: '0 16px', position: 'relative',
+      fontFamily: '-apple-system, system-ui', fontSize: 17,
+      letterSpacing: -0.43,
+    }}>
+      {icon && (
+        <div style={{
+          width: 30, height: 30, borderRadius: 7, background: icon,
+          marginRight: 12, flexShrink: 0,
+        }} />
+      )}
+      <div style={{ flex: 1, color: text }}>{title}</div>
+      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
+      {chevron && (
+        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
+          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      )}
+      {!isLast && (
+        <div style={{
+          position: 'absolute', bottom: 0, right: 0,
+          left: icon ? 58 : 16, height: 0.5, background: sep,
+        }} />
+      )}
+    </div>
+  );
+}
+
+function IOSList({ header, children, dark = false }) {
+  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
+  const bg = dark ? '#1C1C1E' : '#fff';
+  return (
+    <div>
+      {header && (
+        <div style={{
+          fontFamily: '-apple-system, system-ui', fontSize: 13,
+          color: hc, textTransform: 'uppercase',
+          padding: '8px 36px 6px', letterSpacing: -0.08,
+        }}>{header}</div>
+      )}
+      <div style={{
+        background: bg, borderRadius: 26,
+        margin: '0 16px', overflow: 'hidden',
+      }}>{children}</div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Device frame
+// ─────────────────────────────────────────────────────────────
+function IOSDevice({
+  children, width = 402, height = 874, dark = false,
+  title, keyboard = false,
+}) {
+  return (
+    <div style={{
+      width, height, borderRadius: 48, overflow: 'hidden',
+      position: 'relative', background: dark ? '#000' : '#F2F2F7',
+      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
+      fontFamily: '-apple-system, system-ui, sans-serif',
+      WebkitFontSmoothing: 'antialiased',
+    }}>
+      {/* dynamic island */}
+      <div style={{
+        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
+        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
+      }} />
+      {/* status bar (absolute) */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <IOSStatusBar dark={dark} />
+      </div>
+      {/* nav + content */}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
+        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
+        {keyboard && <IOSKeyboard dark={dark} />}
+      </div>
+      {/* home indicator — always on top */}
+      <div style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
+        paddingBottom: 8, pointerEvents: 'none',
+      }}>
+        <div style={{
+          width: 139, height: 5, borderRadius: 100,
+          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
+        }} />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Keyboard — iOS 26 liquid glass
+// ─────────────────────────────────────────────────────────────
+function IOSKeyboard({ dark = false }) {
+  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
+  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
+  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
+
+  // special-key icons
+  const icons = {
+    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
+    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
+    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
+    <div key={k} style={{
+      height: 42, borderRadius: 8.5,
+      flex: flex ? 1 : undefined, width: w, minWidth: 0,
+      background: ret ? '#08f' : keyBg,
+      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: '-apple-system, "SF Compact", system-ui',
+      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
+    }}>{content}</div>
+  );
+
+  const row = (keys, pad = 0) => (
+    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
+      {keys.map(l => key(l, { flex: true, k: l }))}
+    </div>
+  );
+
+  return (
+    <div style={{
+      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
+      padding: '11px 0 2px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      boxShadow: dark
+        ? '0 -2px 20px rgba(0,0,0,0.09)'
+        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
+    }}>
+      {/* liquid glass bg — same recipe as nav pills */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
+      }} />
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: 27,
+        boxShadow: dark
+          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
+          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
+        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* autocorrect bar */}
+      <div style={{
+        display: 'flex', gap: 20, alignItems: 'center',
+        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {['"The"', 'the', 'to'].map((w, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
+            <div style={{
+              flex: 1, textAlign: 'center',
+              fontFamily: '-apple-system, system-ui', fontSize: 17,
+              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
+            }}>{w}</div>
+          </React.Fragment>
+        ))}
+      </div>
+
+      {/* key layout */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', gap: 13,
+        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
+        position: 'relative',
+      }}>
+        {row(['q','w','e','r','t','y','u','i','o','p'])}
+        {row(['a','s','d','f','g','h','j','k','l'], 20)}
+        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
+          {key(icons.shift, { w: 45, k: 'shift' })}
+          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
+            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
+          </div>
+          {key(icons.del, { w: 45, k: 'del' })}
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
+          {key('', { flex: true, k: 'space' })}
+          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
+        </div>
+      </div>
+
+      {/* bottom spacer (emoji+mic area, icons omitted) */}
+      <div style={{ height: 56, width: '100%', position: 'relative' }} />
+    </div>
+  );
+}
+
+Object.assign(window, {
+  IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
+});
+
+</script>
+<script type="text/babel" data-module="tweaks-panel.jsx">
+// @ds-adherence-ignore -- omelette starter scaffold (raw elements/hex/px by design)
+
+/* BEGIN USAGE */
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+// Exports (to window): useTweaks, TweaksPanel, TweakSection, TweakRow, TweakSlider,
+//   TweakToggle, TweakRadio, TweakSelect, TweakText, TweakNumber, TweakColor, TweakButton.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// TweakRadio is the segmented control for 2–3 short options (auto-falls-back to
+// TweakSelect past ~16/~10 chars per label); reach for TweakSelect directly when
+// options are many or long. For color tweaks always curate 3-4 options rather than
+// a free picker; an option can also be a whole 2–5 color palette (the stored value
+// is the array). The Tweak* controls are a floor, not a ceiling — build custom
+// controls inside the panel if a tweak calls for UI they don't cover.
+/* END USAGE */
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-omelette-chrome=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+
+</script>
+<script type="text/babel" data-module="app/ds.jsx">
+// ── Kaani · Design System ─────────────────────────────────────
+// Tokens, icon set, and shared atoms. Exports to window.
+
+// Palette: deep eco green + 5★ gold/amber, warm cream paper, diamond silver.
+const K = {
+  // greens
+  forestDeep: '#0C3426',
+  forest:     '#0E3B2C',
+  forest2:    '#16533D',
+  sage:       '#5E7A6B',
+  // warm paper / ink
+  cream:      '#F5EFE3',   // app background
+  paper:      '#FFFFFF',
+  paperWarm:  '#FCF8F0',
+  ink:        '#1E1C16',
+  ink2:       '#4A463B',
+  muted:      '#8B8676',
+  hair:       '#E9E2D2',   // hairlines on cream
+  hairWarm:   '#EDE6D6',
+  // gold / amber (the "5 étoiles")
+  gold:       '#C79A3E',
+  goldSoft:   '#E2C173',
+  goldDeep:   '#9A7320',
+  goldWash:   '#F7EEDA',
+  amber:      '#D8742E',   // appetizing warm
+  amberSoft:  '#F0C9A4',
+  // diamond
+  diamond:    '#7C8B95',
+  diamondLt:  '#C7D0D6',
+  diamondWash:'#EEF2F4',
+  // status
+  fresh:      '#3F8F5B',
+  freshWash:  '#E6F0E7',
+};
+
+// canonical money fmt
+const fcfa = (n) => n.toLocaleString('fr-FR').replace(/\u202f/g, ' ') + ' FCFA';
+
+const FONT_DISPLAY = "'Bricolage Grotesque', system-ui, sans-serif";
+const FONT_BODY = "'Plus Jakarta Sans', system-ui, sans-serif";
+const FONT_MONO = "'IBM Plex Mono', ui-monospace, monospace";
+
+// ── Icons (24×24, stroke = currentColor) ──────────────────────
+function Icon({ name, size = 22, stroke = 1.8, fill = 'none', style = {} }) {
+  const p = { fill: 'none', stroke: 'currentColor', strokeWidth: stroke, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  const paths = {
+    pin: <><path {...p} d="M12 21c4-4.5 7-8 7-11a7 7 0 1 0-14 0c0 3 3 6.5 7 11Z"/><circle {...p} cx="12" cy="10" r="2.4"/></>,
+    search: <><circle {...p} cx="11" cy="11" r="6.5"/><path {...p} d="M20 20l-3.5-3.5"/></>,
+    leaf: <><path {...p} d="M5 19c0-7 5-13 14-13 0 9-6 14-13 14a6 6 0 0 1-1-1Z"/><path {...p} d="M9 16c2.5-3 5-4.5 8-5.5"/></>,
+    diamond: <><path {...p} d="M6 4h12l3 5-9 11L3 9l3-5Z"/><path {...p} d="M3 9h18M9 4l-3 5 6 11 6-11-3-5"/></>,
+    moto: <><circle {...p} cx="5.5" cy="17" r="2.5"/><circle {...p} cx="18.5" cy="17" r="2.5"/><path {...p} d="M5.5 17h6l3-6h3M11 17l3-6M14 8h3l1 3M8 8h4l2 3"/></>,
+    clock: <><circle {...p} cx="12" cy="12" r="8"/><path {...p} d="M12 8v4l3 2"/></>,
+    star: <path {...p} d="M12 4l2.3 4.8 5.2.7-3.8 3.6.9 5.1L12 15.8 7.4 18.2l.9-5.1L4.5 9.5l5.2-.7L12 4Z"/>,
+    sparkle: <path {...p} d="M12 4c.6 3.5 1.5 4.4 5 5-3.5.6-4.4 1.5-5 5-.6-3.5-1.5-4.4-5-5 3.5-.6 4.4-1.5 5-5Z"/>,
+    plus: <path {...p} d="M12 6v12M6 12h12"/>,
+    minus: <path {...p} d="M6 12h12"/>,
+    check: <path {...p} d="M5 12.5l4.5 4.5L19 7"/>,
+    chevR: <path {...p} d="M9 5l7 7-7 7"/>,
+    chevL: <path {...p} d="M15 5l-7 7 7 7"/>,
+    chevD: <path {...p} d="M5 9l7 7 7-7"/>,
+    x: <path {...p} d="M6 6l12 12M18 6L6 18"/>,
+    home: <><path {...p} d="M4 11l8-6 8 6"/><path {...p} d="M6 10v9h12v-9"/></>,
+    grid: <><rect {...p} x="4" y="4" width="7" height="7" rx="1.5"/><rect {...p} x="13" y="4" width="7" height="7" rx="1.5"/><rect {...p} x="4" y="13" width="7" height="7" rx="1.5"/><rect {...p} x="13" y="13" width="7" height="7" rx="1.5"/></>,
+    receipt: <><path {...p} d="M6 3h12v18l-2.2-1.4L13.6 21 12 19.6 10.4 21 8.2 19.6 6 21V3Z"/><path {...p} d="M9 8h6M9 12h6"/></>,
+    store: <><path {...p} d="M4 9l1.2-4h13.6L20 9M4 9v10h16V9M4 9h16M9 19v-5h6v5"/></>,
+    user: <><circle {...p} cx="12" cy="8.5" r="3.5"/><path {...p} d="M5 20c0-3.6 3.1-5.5 7-5.5s7 1.9 7 5.5"/></>,
+    heart: <path {...p} d="M12 20S4 14.5 4 9.2A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 8 2.2C20 14.5 12 20 12 20Z"/>,
+    shield: <><path {...p} d="M12 3l7 3v5c0 5-3.4 8.3-7 10-3.6-1.7-7-5-7-10V6l7-3Z"/><path {...p} d="M9 12l2 2 4-4"/></>,
+    phone: <path {...p} d="M6 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2 2A15 15 0 0 1 4 6a2 2 0 0 1 2-2Z"/>,
+    cash: <><rect {...p} x="3" y="6" width="18" height="12" rx="2"/><circle {...p} cx="12" cy="12" r="2.5"/><path {...p} d="M6 9.5v5M18 9.5v5"/></>,
+    wallet: <><path {...p} d="M4 7h13a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/><circle cx="16" cy="13" r="1.3" fill="currentColor" stroke="none"/></>,
+    info: <><circle {...p} cx="12" cy="12" r="8.5"/><path {...p} d="M12 11v5M12 8h.01"/></>,
+    lock: <><rect {...p} x="5" y="10" width="14" height="10" rx="2"/><path {...p} d="M8 10V7a4 4 0 0 1 8 0v3"/></>,
+    bag: <><path {...p} d="M6 8h12l-1 12H7L6 8Z"/><path {...p} d="M9 8V6a3 3 0 0 1 6 0v2"/></>,
+    bell: <><path {...p} d="M6 9a6 6 0 0 1 12 0c0 5 1.5 6 1.5 6H4.5S6 14 6 9Z"/><path {...p} d="M10 19a2 2 0 0 0 4 0"/></>,
+    arrowR: <path {...p} d="M5 12h14M13 6l6 6-6 6"/>,
+    tag: <><path {...p} d="M3 12l9-9 9 9-9 9-9-9Z"/><circle cx="9" cy="9" r="1.4" fill="currentColor" stroke="none"/></>,
+    flame: <path {...p} d="M12 3c1 3 4 4 4 8a4 4 0 0 1-8 0c0-1.5.5-2.5 1-3 .3 1 1 1.5 1.5 1.5C10 7 11 5 12 3Z"/>,
+    qmark: <><circle {...p} cx="12" cy="12" r="9"/><path {...p} d="M9.5 9.5a2.5 2.5 0 0 1 4 2c0 1.5-2 1.8-2 3.2M12 18h.01"/></>,
+    crown: <path {...p} d="M4 8l3 3 5-6 5 6 3-3-1.5 10H5.5L4 8Z"/>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} style={{ display: 'block', flexShrink: 0, ...style }}>
+      {paths[name] || null}
+    </svg>
+  );
+}
+
+// ── Food image placeholder ────────────────────────────────────
+// Premium warm gradient + faint texture + discreet mono caption.
+const FOOD_PRESETS = {
+  buffet:  ['#E9B872', '#C9772F', '#7A3B16'],
+  buffet2: ['#E7C98A', '#B9802E', '#5E3A12'],
+  pastry:  ['#F2D0C0', '#D98E84', '#8A4A53'],
+  pastry2: ['#F4E0C2', '#D9A65E', '#8A5A2A'],
+  green:   ['#A9C39A', '#5E8A5E', '#2E5238'],
+  mystery: ['#26483A', '#0E3B2C', '#06231A'],
+};
+function FoodImg({ preset = 'buffet', label, blur = 0, round = 0, height = '100%', children, style = {} }) {
+  const [a, b, c] = FOOD_PRESETS[preset] || FOOD_PRESETS.buffet;
+  return (
+    <div style={{
+      position: 'relative', width: '100%', height, borderRadius: round, overflow: 'hidden',
+      background: `radial-gradient(120% 90% at 25% 18%, ${a} 0%, ${b} 48%, ${c} 100%)`,
+      ...style,
+    }}>
+      {/* faint placeholder texture */}
+      <div style={{ position: 'absolute', inset: 0, filter: blur ? `blur(${blur}px)` : 'none',
+        background: 'repeating-linear-gradient(125deg, rgba(255,255,255,0.06) 0 2px, transparent 2px 16px)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(80% 60% at 70% 80%, rgba(0,0,0,0.22), transparent 60%)' }} />
+      {label && (
+        <div style={{ position: 'absolute', left: 10, bottom: 9, fontFamily: FONT_MONO, fontSize: 9.5,
+          letterSpacing: 0.4, color: 'rgba(255,255,255,0.82)', textTransform: 'uppercase',
+          display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 5, height: 5, borderRadius: 9, background: 'rgba(255,255,255,0.7)' }} />{label}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+// ── Atoms ─────────────────────────────────────────────────────
+function Chip({ icon, children, tone = 'cream', style = {} }) {
+  const tones = {
+    cream:   { bg: 'rgba(255,255,255,0.9)', fg: K.ink2, bd: K.hair },
+    eco:     { bg: K.freshWash, fg: K.fresh, bd: 'transparent' },
+    gold:    { bg: K.goldWash, fg: K.goldDeep, bd: 'transparent' },
+    glass:   { bg: 'rgba(255,255,255,0.18)', fg: '#fff', bd: 'rgba(255,255,255,0.34)' },
+    dark:    { bg: 'rgba(12,52,38,0.9)', fg: '#fff', bd: 'transparent' },
+  };
+  const t = tones[tone] || tones.cream;
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, height: 24, padding: '0 9px',
+      borderRadius: 99, background: t.bg, color: t.fg, border: `1px solid ${t.bd}`,
+      fontFamily: FONT_BODY, fontWeight: 600, fontSize: 11.5, letterSpacing: 0.1, ...style }}>
+      {icon && <Icon name={icon} size={13} stroke={2.2} />}{children}
+    </span>
+  );
+}
+
+function Btn({ children, kind = 'primary', icon, iconR, full, size = 'md', onClick, style = {} }) {
+  const sizes = { sm: { h: 38, fs: 13.5, px: 16 }, md: { h: 52, fs: 16, px: 22 }, lg: { h: 58, fs: 17, px: 24 } };
+  const s = sizes[size];
+  const kinds = {
+    primary: { background: K.forest, color: '#fff', border: 'none', boxShadow: '0 8px 20px rgba(12,52,38,0.26)' },
+    gold:    { background: `linear-gradient(120deg, ${K.goldSoft}, ${K.gold} 60%, ${K.goldDeep})`, color: '#3A2A06', border: 'none', boxShadow: '0 8px 20px rgba(154,115,32,0.3)' },
+    amber:   { background: K.amber, color: '#fff', border: 'none', boxShadow: '0 8px 20px rgba(216,116,46,0.28)' },
+    ghost:   { background: 'transparent', color: K.forest, border: `1.5px solid ${K.forest}`, boxShadow: 'none' },
+    soft:    { background: K.paper, color: K.ink, border: `1px solid ${K.hair}`, boxShadow: '0 2px 8px rgba(0,0,0,0.04)' },
+    glass:   { background: 'rgba(255,255,255,0.16)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', backdropFilter: 'blur(8px)' },
+  };
+  return (
+    <button onClick={onClick} style={{
+      height: s.h, width: full ? '100%' : 'auto', padding: `0 ${s.px}px`, borderRadius: 99,
+      display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9,
+      fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: s.fs, letterSpacing: 0.1, cursor: 'pointer',
+      transition: 'transform .12s ease, filter .12s ease', ...kinds[kind], ...style }}
+      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
+      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+      {icon && <Icon name={icon} size={s.fs + 3} stroke={2.1} />}
+      {children}
+      {iconR && <Icon name={iconR} size={s.fs + 3} stroke={2.1} />}
+    </button>
+  );
+}
+
+// portions-left meter
+function Portions({ left, total = 12, dark = false }) {
+  const pct = Math.max(0.08, left / total);
+  const low = left <= 3;
+  const track = dark ? 'rgba(255,255,255,0.2)' : K.hair;
+  const fill = low ? K.amber : K.fresh;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+      <div style={{ flex: 1, height: 5, borderRadius: 9, background: track, overflow: 'hidden' }}>
+        <div style={{ width: `${pct * 100}%`, height: '100%', borderRadius: 9, background: fill }} />
+      </div>
+      <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 11, color: low ? K.amber : (dark ? 'rgba(255,255,255,0.85)' : K.ink2), whiteSpace: 'nowrap' }}>
+        {left} {left > 1 ? 'restants' : 'restant'}
+      </span>
+    </div>
+  );
+}
+
+// price block "À partir de 1 000 FCFA" + struck original
+function Price({ from, original, size = 'md', light = false }) {
+  const big = size === 'lg' ? 26 : size === 'sm' ? 17 : 21;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <span style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: 9.5, letterSpacing: 0.3,
+        color: light ? 'rgba(255,255,255,0.7)' : K.muted, textTransform: 'uppercase' }}>À partir de</span>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 7 }}>
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: big, lineHeight: 1, color: light ? '#fff' : K.ink, letterSpacing: -0.4 }}>
+          {from.toLocaleString('fr-FR')}<span style={{ fontSize: big * 0.5, fontWeight: 600, marginLeft: 2 }}>FCFA</span>
+        </span>
+        {original && <span style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: light ? 'rgba(255,255,255,0.55)' : K.muted, textDecoration: 'line-through' }}>{original.toLocaleString('fr-FR')}</span>}
+      </div>
+    </div>
+  );
+}
+
+// section header with optional action
+function SectionHead({ kicker, title, action, onAction, icon, accent = K.gold }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', padding: '0 2px', marginBottom: 13 }}>
+      <div>
+        {kicker && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            {icon && <Icon name={icon} size={14} stroke={2.2} style={{ color: accent }} />}
+            <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: 1.4, textTransform: 'uppercase', color: accent, fontWeight: 500 }}>{kicker}</span>
+          </div>
+        )}
+        <h2 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, letterSpacing: -0.5, color: K.ink, lineHeight: 1.05 }}>{title}</h2>
+      </div>
+      {action && (
+        <button onClick={onAction} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0',
+          display: 'flex', alignItems: 'center', gap: 3, fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: K.forest }}>
+          {action}<Icon name="chevR" size={14} stroke={2.4} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+// little wordmark
+function Wordmark({ size = 26, light = false }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+      <div style={{ width: size + 6, height: size + 6, borderRadius: '50% 50% 50% 4px', background: light ? 'rgba(255,255,255,0.16)' : K.forest,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: light ? '#fff' : K.goldSoft, border: light ? '1px solid rgba(255,255,255,0.3)' : 'none' }}>
+        <Icon name="leaf" size={size * 0.62} stroke={2} />
+      </div>
+      <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: size, letterSpacing: -0.6, color: light ? '#fff' : K.ink }}>
+        Kaani
+      </span>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  K, fcfa, FONT_DISPLAY, FONT_BODY, FONT_MONO,
+  Icon, FoodImg, FOOD_PRESETS, Chip, Btn, Portions, Price, SectionHead, Wordmark,
+});
+
+</script>
+<script type="text/babel" data-module="app/data.jsx">
+// ── Kaani · Data ──────────────────────────────────────────────
+// Demo content. Hotel names are illustrative placeholders for the concept.
+
+const MYSTERY = [
+  {
+    id: 'm1', kind: 'mystery', preset: 'mystery',
+    teaser: 'Buffet Mystère du Soir',
+    desc: "Sélection chaude du dîner d'un palace de Niamey — entrées, plats signature et accompagnements du jour.",
+    from: 1000, original: 7500, portions: 6, total: 14, dist: 2.1, window: '19h30 – 21h00',
+    stars: 5, reveal: 'Radisson Blu Hôtel & Conference Center', revealHint: 'Hôtel 5★ · Rive droite',
+    tags: ['Buffet chaud', '8–10 pièces'],
+  },
+  {
+    id: 'm2', kind: 'mystery', preset: 'mystery',
+    teaser: 'Panier Chef Mystère',
+    desc: 'Assortiment gastronomique préparé le jour même par la brigade d’un grand hôtel partenaire.',
+    from: 1500, original: 9000, portions: 3, total: 12, dist: 3.4, window: '20h00 – 21h30',
+    stars: 5, reveal: 'Bravia Hôtel Niamey', revealHint: 'Hôtel 5★ · Centre-ville',
+    tags: ['Gastronomique', 'Portion généreuse'],
+  },
+  {
+    id: 'm3', kind: 'mystery', preset: 'mystery',
+    teaser: 'Surprise Déjeuner 5★',
+    desc: 'Formule complète du déjeuner d’exception, dévoilée à la réception de votre commande.',
+    from: 1000, original: 6500, portions: 9, total: 16, dist: 1.4, window: '13h00 – 14h30',
+    stars: 5, reveal: 'Grand Hôtel du Niger', revealHint: 'Hôtel 5★ · Bord du fleuve',
+    tags: ['Déjeuner', 'Plat + dessert'],
+  },
+];
+
+const DIAMOND = [
+  {
+    id: 'd1', kind: 'diamond', preset: 'buffet',
+    teaser: 'Grand Buffet International', source: 'Soluxe Hôtel',
+    desc: 'Buffet international du soir préparé aujourd’hui : grillades, mafé revisité, poissons du fleuve.',
+    from: 2000, original: 12000, portions: 5, total: 18, dist: 4.0, window: '20h00 – 22h00',
+    stars: 5, tags: ['Préparé aujourd’hui', 'Buffet entier'],
+  },
+  {
+    id: 'd2', kind: 'diamond', preset: 'buffet2',
+    teaser: 'Brunch Signature', source: 'Noom Hôtel',
+    desc: 'Le meilleur du brunch dominical : viennoiseries, plats chauds et fruits frais de saison.',
+    from: 1500, original: 9500, portions: 4, total: 14, dist: 2.8, window: '11h00 – 13h00',
+    stars: 5, tags: ['Brunch', 'Sucré + salé'],
+  },
+];
+
+const PASTRY = [
+  { id: 'p1', kind: 'pastry', preset: 'pastry', teaser: 'Entremets Chocolat-Noisette', source: 'Pâtisserie Le Diplomate',
+    from: 1000, original: 4500, portions: 7, total: 20, dist: 1.1, tags: ['Pièce entière'] },
+  { id: 'p2', kind: 'pastry', preset: 'pastry2', teaser: 'Tarte Mangue & Citron Vert', source: 'Maison Sucrée',
+    from: 1000, original: 4000, portions: 4, total: 16, dist: 2.3, tags: ['6 parts'] },
+  { id: 'p3', kind: 'pastry', preset: 'pastry', teaser: 'Boîte de Macarons (12)', source: 'Atelier Gourmand',
+    from: 1500, original: 6000, portions: 5, total: 18, dist: 3.0, tags: ['12 pièces'] },
+  { id: 'p4', kind: 'pastry', preset: 'pastry2', teaser: 'Mille-feuille Vanille Bourbon', source: 'Pâtisserie Le Diplomate',
+    from: 1000, original: 4500, portions: 2, total: 12, dist: 1.1, tags: ['Du jour'] },
+];
+
+const ALL = [...MYSTERY, ...DIAMOND, ...PASTRY];
+const findOffer = (id) => ALL.find((o) => o.id === id);
+
+const DELIVERY_FEE = 1000;
+
+const PAYMENTS = [
+  { id: 'cash',   label: 'Espèces à la livraison', sub: 'Payez le livreur à la réception', kind: 'cash', tone: '#0E3B2C', badge: 'Populaire' },
+  { id: 'wave',   label: 'Wave',           sub: 'Sans frais · QR / numéro', kind: 'wallet', tone: '#1DA1F2' },
+  { id: 'airtel', label: 'Airtel Money',   sub: 'Mobile Money', kind: 'wallet', tone: '#E2231A' },
+  { id: 'moov',   label: 'Moov Money',     sub: 'Mobile Money', kind: 'wallet', tone: '#F58220' },
+  { id: 'nita',   label: 'Nita Transfert', sub: 'Transfert mobile', kind: 'wallet', tone: '#0E7C66' },
+  { id: 'amana',  label: 'Amana Transfert',sub: 'Transfert mobile', kind: 'wallet', tone: '#7A4FBF' },
+  { id: 'zamani', label: 'Zamani Cash',    sub: 'Portefeuille mobile', kind: 'wallet', tone: '#C79A3E' },
+];
+
+const PAST_ORDERS = [
+  { id: 'o1', title: 'Buffet Mystère du Soir', source: 'Radisson Blu Hôtel', preset: 'mystery', total: 2000, date: 'Hier · 20h12', status: 'Livré' },
+  { id: 'o2', title: 'Tarte Mangue & Citron Vert', source: 'Maison Sucrée', preset: 'pastry2', total: 2000, date: '7 juin · 13h40', status: 'Livré' },
+  { id: 'o3', title: 'Grand Buffet International', source: 'Soluxe Hôtel', preset: 'buffet', total: 3000, date: '3 juin · 21h05', status: 'Livré' },
+];
+
+Object.assign(window, {
+  MYSTERY, DIAMOND, PASTRY, ALL, findOffer, DELIVERY_FEE, PAYMENTS, PAST_ORDERS,
+});
+
+</script>
+<script type="text/babel" data-module="app/screens1.jsx">
+// ── Kaani · Screens 1 — Home / Discovery + Search ─────────────
+
+// Mystery visual treatment (3 variants for the Tweaks exploration)
+function MysteryVisual({ variant = 'flou', height = 186, big = false }) {
+  const qSize = big ? 64 : 46;
+  // shared corner marks
+  if (variant === 'scelle') {
+    return (
+      <div style={{ position: 'relative', width: '100%', height, overflow: 'hidden',
+        background: `linear-gradient(160deg, ${K.forest2}, ${K.forestDeep})` }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 12px)' }} />
+        {/* perforation line */}
+        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 0, borderTop: '2px dashed rgba(226,193,115,0.4)' }} />
+        {/* wax seal medallion */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+          width: qSize + 36, height: qSize + 36, borderRadius: '50%',
+          background: `radial-gradient(circle at 35% 30%, ${K.goldSoft}, ${K.gold} 55%, ${K.goldDeep})`,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.3), inset 0 0 0 3px rgba(255,255,255,0.25)', color: '#3A2A06' }}>
+          <Icon name="diamond" size={qSize * 0.5} stroke={1.8} />
+          <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 600, letterSpacing: 1, marginTop: 1 }}>SCELLÉ</span>
+        </div>
+        <span style={{ position: 'absolute', bottom: 10, width: '100%', textAlign: 'center', fontFamily: FONT_MONO,
+          fontSize: 9, letterSpacing: 1, color: 'rgba(226,193,115,0.75)', textTransform: 'uppercase' }}>Dévoilé à la livraison</span>
+      </div>
+    );
+  }
+  if (variant === 'voile') {
+    return (
+      <div style={{ position: 'relative', width: '100%', height, overflow: 'hidden' }}>
+        <FoodImg preset="buffet" blur={7} height="100%" />
+        {/* gold veil */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(150deg, rgba(199,154,62,0.55), rgba(12,52,38,0.62))`, backdropFilter: 'blur(2px)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <div style={{ width: qSize, height: qSize, borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+            <Icon name="diamond" size={qSize * 0.5} stroke={1.6} />
+          </div>
+          <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: big ? 18 : 15, color: '#fff', letterSpacing: 0.2 }}>Hôtel Mystère</span>
+        </div>
+      </div>
+    );
+  }
+  // 'flou' — blurred premium + big question mark
+  return (
+    <div style={{ position: 'relative', width: '100%', height, overflow: 'hidden' }}>
+      <FoodImg preset="buffet2" blur={13} height="100%" />
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(70% 70% at 50% 42%, rgba(12,52,38,0.35), rgba(6,35,26,0.78))' }} />
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <div style={{ width: qSize + 18, height: qSize + 18, borderRadius: '50%',
+          border: `2px solid ${K.goldSoft}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: K.goldSoft, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: qSize, lineHeight: 1,
+          boxShadow: '0 0 0 6px rgba(226,193,115,0.12)' }}>?</div>
+        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: 1.5, color: 'rgba(226,193,115,0.85)', textTransform: 'uppercase' }}>Hôtel 5★ masqué</span>
+      </div>
+    </div>
+  );
+}
+
+function MysteryCard({ offer, variant, onOpen, big = false }) {
+  return (
+    <div onClick={() => onOpen(offer)} style={{ width: big ? '100%' : 286, flexShrink: 0, cursor: 'pointer',
+      background: K.paper, borderRadius: 22, overflow: 'hidden', border: `1px solid ${K.hair}`,
+      boxShadow: '0 10px 26px rgba(20,40,30,0.08)' }}>
+      <div style={{ position: 'relative' }}>
+        <MysteryVisual variant={variant} height={big ? 210 : 178} big={big} />
+        <div style={{ position: 'absolute', top: 11, left: 11 }}>
+          <Chip tone="gold" icon="star">5★ Mystère</Chip>
+        </div>
+        <div style={{ position: 'absolute', top: 11, right: 11 }}>
+          <Chip tone="eco" icon="leaf">Anti-gaspi</Chip>
+        </div>
+      </div>
+      <div style={{ padding: 15 }}>
+        <h3 style={{ margin: '0 0 5px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17, letterSpacing: -0.3, color: K.ink }}>{offer.teaser}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 11, fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Icon name="clock" size={13} stroke={2} />{offer.window}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><Icon name="pin" size={13} stroke={2} />{offer.dist} km</span>
+        </div>
+        <div style={{ marginBottom: 12 }}><Portions left={offer.portions} total={offer.total} /></div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <Price from={offer.from} original={offer.original} />
+          <Btn kind="primary" size="sm" iconR="arrowR">Commander</Btn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// compact card for diamond rail + pastry grid
+function OfferCard({ offer, onOpen, grid = false }) {
+  const isPastry = offer.kind === 'pastry';
+  return (
+    <div onClick={() => onOpen(offer)} style={{ width: grid ? '100%' : 200, flexShrink: 0, cursor: 'pointer',
+      background: K.paper, borderRadius: 18, overflow: 'hidden', border: `1px solid ${K.hair}`,
+      boxShadow: '0 6px 16px rgba(20,40,30,0.06)' }}>
+      <div style={{ position: 'relative' }}>
+        <FoodImg preset={offer.preset} height={grid ? 116 : 124} label={isPastry ? 'photo · dessert' : 'photo · buffet 5★'} />
+        <div style={{ position: 'absolute', top: 9, left: 9 }}>
+          <Chip tone="dark" style={{ height: 21, fontSize: 10.5 }}>-{Math.round((1 - offer.from / offer.original) * 100)}%</Chip>
+        </div>
+        {offer.kind === 'diamond' && (
+          <div style={{ position: 'absolute', top: 9, right: 9, width: 24, height: 24, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: K.diamond }}>
+            <Icon name="diamond" size={14} stroke={2} />
+          </div>
+        )}
+      </div>
+      <div style={{ padding: '11px 12px 13px' }}>
+        <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: 0.6, color: K.gold, textTransform: 'uppercase', marginBottom: 3 }}>{offer.source}</div>
+        <h3 style={{ margin: '0 0 9px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, lineHeight: 1.15, letterSpacing: -0.2, color: K.ink,
+          minHeight: grid ? 33 : 'auto', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{offer.teaser}</h3>
+        <div style={{ marginBottom: 10 }}><Portions left={offer.portions} total={offer.total} /></div>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <Price from={offer.from} original={offer.original} size="sm" />
+          <button onClick={(e) => { e.stopPropagation(); onOpen(offer); }} style={{ width: 34, height: 34, borderRadius: '50%', border: 'none',
+            background: K.forest, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+            <Icon name="plus" size={18} stroke={2.4} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeHeader({ onSearch }) {
+  return (
+    <div style={{ padding: '52px 18px 16px', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forest} 62%, ${K.forest})`,
+      borderRadius: '0 0 26px 26px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', top: -40, right: -30, width: 160, height: 160, borderRadius: '50%', background: 'rgba(226,193,115,0.12)' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <Wordmark size={23} light />
+        <div style={{ display: 'flex', gap: 9 }}>
+          <button style={iconBtnGlass}><Icon name="heart" size={19} stroke={2} /></button>
+          <button style={iconBtnGlass}><Icon name="bell" size={19} stroke={2} /></button>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+        <Icon name="pin" size={15} stroke={2} style={{ color: K.goldSoft }} />
+        <span style={{ fontFamily: FONT_BODY, fontSize: 13, color: 'rgba(255,255,255,0.78)' }}>Livré à</span>
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: '#fff' }}>Niamey · Plateau</span>
+        <Icon name="chevD" size={15} stroke={2.2} style={{ color: 'rgba(255,255,255,0.7)' }} />
+      </div>
+      <button onClick={onSearch} style={{ width: '100%', height: 50, borderRadius: 15, border: 'none', cursor: 'pointer',
+        background: 'rgba(255,255,255,0.95)', display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', textAlign: 'left' }}>
+        <Icon name="search" size={20} stroke={2} style={{ color: K.muted }} />
+        <span style={{ fontFamily: FONT_BODY, fontSize: 14.5, color: K.muted, flex: 1 }}>Buffet, pâtisserie, hôtel…</span>
+        <span style={{ width: 34, height: 34, borderRadius: 10, background: K.goldWash, display: 'flex', alignItems: 'center', justifyContent: 'center', color: K.goldDeep }}>
+          <Icon name="tag" size={17} stroke={2} />
+        </span>
+      </button>
+    </div>
+  );
+}
+const iconBtnGlass = { width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(255,255,255,0.25)',
+  background: 'rgba(255,255,255,0.12)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' };
+
+// the 3-E value strip
+function ThreeE() {
+  const items = [
+    { icon: 'leaf', t: 'Écologie', s: 'Zéro gaspi' },
+    { icon: 'tag', t: 'Économies', s: 'Jusqu’à -80%' },
+    { icon: 'sparkle', t: 'Plaisir', s: 'Saveurs 5★' },
+  ];
+  return (
+    <div style={{ display: 'flex', gap: 8, margin: '16px 18px 4px' }}>
+      {items.map((it) => (
+        <div key={it.t} style={{ flex: 1, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 15, padding: '11px 8px',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center' }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: K.freshWash, color: K.fresh, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name={it.icon} size={18} stroke={2.1} />
+          </div>
+          <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 12.5, color: K.ink }}>{it.t}</span>
+          <span style={{ fontFamily: FONT_BODY, fontSize: 10, color: K.muted }}>{it.s}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function HomeScreen({ onOpen, onSearch, onPartner, mysteryVariant }) {
+  return (
+    <div style={{ paddingBottom: 24 }}>
+      <HomeHeader onSearch={onSearch} />
+      <ThreeE />
+
+      {/* Hôtel Mystère */}
+      <div style={{ marginTop: 22 }}>
+        <div style={{ padding: '0 18px' }}>
+          <SectionHead kicker="Concept signature" title="Hôtel Mystère" icon="star" accent={K.gold} />
+        </div>
+        <div style={{ display: 'flex', gap: 13, overflowX: 'auto', padding: '0 18px 4px', scrollbarWidth: 'none' }} className="hscroll">
+          {MYSTERY.map((o) => <MysteryCard key={o.id} offer={o} variant={mysteryVariant} onOpen={onOpen} />)}
+        </div>
+      </div>
+
+      {/* Badge Diamant — exclusive framed block */}
+      <div style={{ margin: '26px 18px 0', borderRadius: 24, padding: 18, position: 'relative', overflow: 'hidden',
+        background: `linear-gradient(155deg, ${K.forest} 0%, ${K.forestDeep} 100%)`, border: `1px solid ${K.forest2}` }}>
+        <div style={{ position: 'absolute', top: -30, right: -20, opacity: 0.12, color: K.diamondLt }}><Icon name="diamond" size={150} stroke={1} /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ width: 26, height: 26, borderRadius: 8, background: 'rgba(199,208,214,0.16)', color: K.diamondLt, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="diamond" size={16} stroke={2} />
+          </span>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: 1.6, color: K.diamondLt, textTransform: 'uppercase' }}>Accès exclusif</span>
+        </div>
+        <h2 style={{ margin: '0 0 4px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 23, color: '#fff', letterSpacing: -0.4 }}>Badge Diamant</h2>
+        <p style={{ margin: '0 0 15px', fontFamily: FONT_BODY, fontSize: 12.5, lineHeight: 1.4, color: 'rgba(255,255,255,0.7)', maxWidth: 260 }}>
+          Les meilleurs buffets 5★ préparés aujourd’hui, en direct des cuisines partenaires.
+        </p>
+        <div style={{ display: 'flex', gap: 13, overflowX: 'auto', margin: '0 -18px', padding: '0 18px 2px' }} className="hscroll">
+          {DIAMOND.map((o) => <OfferCard key={o.id} offer={o} onOpen={onOpen} />)}
+        </div>
+      </div>
+
+      {/* Pâtisseries de Chefs */}
+      <div style={{ padding: '26px 18px 0' }}>
+        <SectionHead kicker="Sucré · prix cassés" title="Pâtisseries de Chefs" action="Tout voir" onAction={onSearch} icon="sparkle" accent={K.amber} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
+          {PASTRY.map((o) => <OfferCard key={o.id} offer={o} onOpen={onOpen} grid />)}
+        </div>
+      </div>
+
+      {/* B2B teaser strip */}
+      <div onClick={onPartner} style={{ margin: '24px 18px 0', cursor: 'pointer', borderRadius: 20, padding: '16px 18px',
+        background: K.goldWash, border: `1px solid ${K.goldSoft}`, display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ width: 44, height: 44, borderRadius: 13, background: K.gold, color: '#3A2A06', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon name="store" size={24} stroke={2} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: K.ink }}>Vous êtes hôtelier ou pâtissier ?</div>
+          <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: K.ink2 }}>Ne jetez plus vos invendus, valorisez-les.</div>
+        </div>
+        <Icon name="chevR" size={20} stroke={2.2} style={{ color: K.goldDeep }} />
+      </div>
+    </div>
+  );
+}
+
+// ── Search screen ─────────────────────────────────────────────
+function SearchScreen({ onOpen, mysteryVariant }) {
+  const [q, setQ] = React.useState('');
+  const cats = ['Tout', 'Hôtel Mystère', 'Buffets 5★', 'Pâtisseries', 'Près de moi'];
+  const [cat, setCat] = React.useState('Tout');
+  let results = ALL;
+  if (cat === 'Hôtel Mystère') results = MYSTERY;
+  else if (cat === 'Buffets 5★') results = DIAMOND;
+  else if (cat === 'Pâtisseries') results = PASTRY;
+  if (q) results = results.filter((o) => (o.teaser + (o.source || '')).toLowerCase().includes(q.toLowerCase()));
+  return (
+    <div style={{ paddingTop: 56 }}>
+      <div style={{ padding: '0 18px 8px' }}>
+        <h1 style={{ margin: '0 0 14px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Rechercher</h1>
+        <div style={{ height: 50, borderRadius: 15, background: K.paper, border: `1px solid ${K.hair}`, display: 'flex', alignItems: 'center', gap: 10, padding: '0 15px' }}>
+          <Icon name="search" size={20} stroke={2} style={{ color: K.muted }} />
+          <input autoFocus value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buffet, pâtisserie, hôtel…"
+            style={{ border: 'none', outline: 'none', background: 'none', flex: 1, fontFamily: FONT_BODY, fontSize: 15, color: K.ink }} />
+          {q && <button onClick={() => setQ('')} style={{ border: 'none', background: 'none', color: K.muted, cursor: 'pointer' }}><Icon name="x" size={18} /></button>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 18px 14px' }} className="hscroll">
+        {cats.map((c) => (
+          <button key={c} onClick={() => setCat(c)} style={{ flexShrink: 0, height: 36, padding: '0 16px', borderRadius: 99, cursor: 'pointer',
+            border: `1px solid ${cat === c ? K.forest : K.hair}`, background: cat === c ? K.forest : K.paper,
+            color: cat === c ? '#fff' : K.ink2, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 13 }}>{c}</button>
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13, padding: '0 18px 20px' }}>
+        {results.map((o) => o.kind === 'mystery'
+          ? <MysteryCard key={o.id} offer={o} variant={mysteryVariant} onOpen={onOpen} big />
+          : <OfferCard key={o.id} offer={o} onOpen={onOpen} grid />)}
+        {results.length === 0 && <div style={{ gridColumn: '1/3', textAlign: 'center', padding: 40, color: K.muted, fontFamily: FONT_BODY }}>Aucun résultat pour « {q} »</div>}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { MysteryVisual, MysteryCard, OfferCard, HomeScreen, SearchScreen });
+
+</script>
+<script type="text/babel" data-module="app/screens2.jsx">
+// ── Kaani · Screens 2 — Offer detail + Payment ────────────────
+
+function TopBar({ onBack, light = false, title, onShare }) {
+  const c = light ? '#fff' : K.ink;
+  const bg = light ? 'rgba(255,255,255,0.16)' : K.paper;
+  const bd = light ? 'rgba(255,255,255,0.3)' : K.hair;
+  const btn = { width: 40, height: 40, borderRadius: 12, border: `1px solid ${bd}`, background: bg, color: c,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)' };
+  return (
+    <div style={{ position: 'absolute', top: 52, left: 0, right: 0, zIndex: 30, display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', padding: '0 16px' }}>
+      <button onClick={onBack} style={btn}><Icon name="chevL" size={20} stroke={2.3} /></button>
+      {title && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: c }}>{title}</span>}
+      <button style={btn} onClick={onShare}><Icon name="heart" size={19} stroke={2} /></button>
+    </div>
+  );
+}
+
+function InfoRow({ icon, title, sub, accent = K.forest }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ width: 38, height: 38, borderRadius: 12, background: K.cream, color: accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon name={icon} size={20} stroke={2} />
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13.5, color: K.ink }}>{title}</div>
+        <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+function DetailScreen({ offer, mysteryVariant, onBack, onOrder }) {
+  const [qty, setQty] = React.useState(1);
+  const isMystery = offer.kind === 'mystery';
+  const formula = isMystery
+    ? ['Sélection de plats chauds du jour', 'Accompagnements & garnitures 5★', 'Portion généreuse 1–2 pers.']
+    : offer.kind === 'pastry'
+      ? ['Pièce préparée le jour même', 'Recette de chef pâtissier', 'Idéale à partager']
+      : ['Buffet complet du jour', 'Entrées · plats · desserts', 'Quantité généreuse'];
+  return (
+    <div style={{ position: 'relative', paddingBottom: 110 }}>
+      <TopBar onBack={onBack} light />
+      {/* hero */}
+      <div style={{ position: 'relative' }}>
+        {isMystery
+          ? <MysteryVisual variant={mysteryVariant} height={320} big />
+          : <FoodImg preset={offer.preset} height={320} label={offer.kind === 'pastry' ? 'photo · dessert de chef' : 'photo · buffet 5★'} />}
+        <div style={{ position: 'absolute', bottom: 30, left: 16, right: 16, display: 'flex', gap: 7 }}>
+          <Chip tone="eco" icon="leaf">Anti-gaspi</Chip>
+          {isMystery
+            ? <Chip tone="gold" icon="star">Hôtel 5★ mystère</Chip>
+            : <Chip tone="dark" icon="diamond">{offer.kind === 'diamond' ? 'Badge Diamant' : 'Chef'}</Chip>}
+          <Chip tone="glass">-{Math.round((1 - offer.from / offer.original) * 100)}%</Chip>
+        </div>
+      </div>
+
+      {/* body card overlapping */}
+      <div style={{ position: 'relative', marginTop: -20, background: K.cream, borderRadius: '24px 24px 0 0', padding: '22px 18px 0' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: 0.8, color: K.gold, textTransform: 'uppercase', marginBottom: 4 }}>
+              {isMystery ? 'Identité dévoilée à la livraison' : offer.source}
+            </div>
+            <h1 style={{ margin: 0, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 25, lineHeight: 1.08, letterSpacing: -0.6, color: K.ink }}>{offer.teaser}</h1>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 99, padding: '5px 10px', flexShrink: 0 }}>
+            <Icon name="star" size={14} stroke={2} style={{ color: K.gold }} fill={K.gold} />
+            <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, color: K.ink }}>{offer.stars || 5}.0</span>
+          </div>
+        </div>
+
+        <p style={{ margin: '12px 0 16px', fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.55, color: K.ink2 }}>{offer.desc}</p>
+
+        {/* portions banner */}
+        <div style={{ background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 16, padding: '13px 15px', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, color: K.amber }}>
+              <Icon name="flame" size={16} stroke={2} />Vite, ça part !
+            </span>
+            <span style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>{offer.window || 'Retrait du jour'}</span>
+          </div>
+          <Portions left={offer.portions} total={offer.total} />
+        </div>
+
+        {/* formula */}
+        <h3 style={{ margin: '4px 0 10px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: K.ink }}>La formule</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 18 }}>
+          {formula.map((f) => (
+            <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 22, height: 22, borderRadius: '50%', background: K.freshWash, color: K.fresh, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon name="check" size={14} stroke={2.6} />
+              </span>
+              <span style={{ fontFamily: FONT_BODY, fontSize: 13.5, color: K.ink2 }}>{f}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* delivery */}
+        <h3 style={{ margin: '4px 0 12px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: K.ink }}>Livraison</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 8 }}>
+          <InfoRow icon="moto" title="Livraison à moto" sub="Zone urbaine de Niamey · suivi en direct" />
+          <InfoRow icon="tag" title={`${fcfa(DELIVERY_FEE)} fixe`} sub="Tarif unique partout en ville" accent={K.amber} />
+          <InfoRow icon="shield" title="Mystère protégé" sub="L’hôtel est dévoilé à la réception" accent={K.gold} />
+        </div>
+      </div>
+
+      {/* sticky order bar */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px 14px',
+        background: 'rgba(245,239,227,0.92)', backdropFilter: 'blur(12px)', borderTop: `1px solid ${K.hair}`,
+        display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 99, padding: 4 }}>
+          <button onClick={() => setQty(Math.max(1, qty - 1))} style={stepBtn}><Icon name="minus" size={17} stroke={2.4} /></button>
+          <span style={{ width: 22, textAlign: 'center', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: K.ink }}>{qty}</span>
+          <button onClick={() => setQty(qty + 1)} style={stepBtn}><Icon name="plus" size={17} stroke={2.4} /></button>
+        </div>
+        <Btn kind="primary" size="lg" full onClick={() => onOrder(offer, qty)} style={{ flex: 1 }}>
+          Commander · {fcfa(offer.from * qty)}
+        </Btn>
+      </div>
+    </div>
+  );
+}
+const stepBtn = { width: 34, height: 34, borderRadius: '50%', border: 'none', background: K.cream, color: K.forest,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' };
+
+// ── Payment tunnel ────────────────────────────────────────────
+function PayMethod({ m, active, onPick }) {
+  return (
+    <button onClick={() => onPick(m.id)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer',
+      background: active ? K.paper : K.paperWarm, border: `1.5px solid ${active ? K.forest : K.hair}`, borderRadius: 16, padding: '13px 14px',
+      textAlign: 'left' }}>
+      <div style={{ width: 40, height: 40, borderRadius: 11, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: m.kind === 'cash' ? K.freshWash : '#fff', border: `1px solid ${K.hair}`, color: m.tone }}>
+        <Icon name={m.kind === 'cash' ? 'cash' : 'wallet'} size={21} stroke={2} />
+      </div>
+      <div style={{ flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+          <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: K.ink }}>{m.label}</span>
+          {m.badge && <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 9.5, color: K.fresh, background: K.freshWash, padding: '2px 6px', borderRadius: 6 }}>{m.badge}</span>}
+        </div>
+        <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>{m.sub}</div>
+      </div>
+      <span style={{ width: 22, height: 22, borderRadius: '50%', border: `2px solid ${active ? K.forest : K.hair}`, background: active ? K.forest : 'transparent',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', flexShrink: 0 }}>
+        {active && <Icon name="check" size={13} stroke={3} />}
+      </span>
+    </button>
+  );
+}
+
+function PaymentScreen({ cart, onBack, onConfirm }) {
+  const [pay, setPay] = React.useState('cash');
+  const { offer, qty } = cart;
+  const meals = offer.from * qty;
+  const total = meals + DELIVERY_FEE;
+  return (
+    <div style={{ position: 'relative', paddingTop: 92, paddingBottom: 116, minHeight: '100%' }}>
+      <TopBar onBack={onBack} title="Paiement" />
+
+      {/* delivery to */}
+      <div style={{ padding: '0 18px' }}>
+        <div style={{ background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 18, padding: 16, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: 1, color: K.gold, textTransform: 'uppercase' }}>Livraison moto</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT_BODY, fontWeight: 700, fontSize: 11.5, color: K.fresh }}>
+              <Icon name="clock" size={13} stroke={2.2} />25–35 min
+            </span>
+          </div>
+          <InfoRow icon="pin" title="Plateau, Niamey" sub="Rue PL-12 · près du rond-point" />
+          <div style={{ height: 1, background: K.hair, margin: '13px 0' }} />
+          <InfoRow icon="moto" title="Suivi en direct" sub="Position du livreur partagée in-app" accent={K.amber} />
+        </div>
+      </div>
+
+      {/* payment methods */}
+      <div style={{ padding: '0 18px' }}>
+        <h3 style={{ margin: '0 0 12px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17, color: K.ink }}>Moyen de paiement</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+          {PAYMENTS.map((m) => <PayMethod key={m.id} m={m} active={pay === m.id} onPick={setPay} />)}
+        </div>
+      </div>
+
+      {/* recap */}
+      <div style={{ padding: '18px 18px 0' }}>
+        <div style={{ background: K.forest, borderRadius: 20, padding: '16px 18px', color: '#fff' }}>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: 1.2, color: K.goldSoft, textTransform: 'uppercase' }}>Récapitulatif</span>
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 9 }}>
+            <Recap label={`${offer.teaser} × ${qty}`} val={fcfa(meals)} />
+            <Recap label="Livraison à moto" val={fcfa(DELIVERY_FEE)} />
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.15)', margin: '3px 0' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: '#fff' }}>Total</span>
+              <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 22, color: K.goldSoft, letterSpacing: -0.4 }}>{fcfa(total)}</span>
+            </div>
+          </div>
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 7, background: 'rgba(255,255,255,0.08)', borderRadius: 11, padding: '9px 11px' }}>
+            <Icon name="leaf" size={16} stroke={2} style={{ color: K.goldSoft }} />
+            <span style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: 'rgba(255,255,255,0.82)' }}>1 repas sauvé du gaspillage avec cette commande 🌱</span>
+          </div>
+        </div>
+      </div>
+
+      {/* confirm */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px 14px',
+        background: 'rgba(245,239,227,0.92)', backdropFilter: 'blur(12px)', borderTop: `1px solid ${K.hair}` }}>
+        <Btn kind="gold" size="lg" full icon="lock" onClick={() => onConfirm(cart, pay, total)}>
+          Confirmer · {fcfa(total)}
+        </Btn>
+      </div>
+    </div>
+  );
+}
+function Recap({ label, val }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <span style={{ fontFamily: FONT_BODY, fontSize: 13, color: 'rgba(255,255,255,0.75)' }}>{label}</span>
+      <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13.5, color: '#fff' }}>{val}</span>
+    </div>
+  );
+}
+
+Object.assign(window, { TopBar, InfoRow, DetailScreen, PaymentScreen, PayMethod });
+
+</script>
+<script type="text/babel" data-module="app/screens3.jsx">
+// ── Kaani · Screens 3 — Confirmation / Profile / B2B ──────────
+
+function ConfirmScreen({ cart, pay, total, onTrack, onHome }) {
+  const { offer } = cart;
+  const isMystery = offer.kind === 'mystery';
+  const [revealed, setRevealed] = React.useState(!isMystery);
+  const payLabel = (PAYMENTS.find((p) => p.id === pay) || {}).label || 'Espèces';
+  const [orderNo] = React.useState(() => 'KN-' + Math.floor(2000 + Math.random() * 7999));
+  return (
+    <div style={{ minHeight: '100%', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forestDeep} 46%, ${K.cream} 46%, ${K.cream} 100%)`,
+      paddingTop: 76, paddingBottom: 120, position: 'relative' }}>
+      {/* success head */}
+      <div style={{ textAlign: 'center', padding: '0 24px', color: '#fff' }}>
+        <div className="kpop" style={{ width: 78, height: 78, borderRadius: '50%', margin: '0 auto 16px',
+          background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: K.goldSoft, color: K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="check" size={32} stroke={3} />
+          </div>
+        </div>
+        <h1 style={{ margin: '0 0 6px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 27, letterSpacing: -0.6 }}>Commande confirmée !</h1>
+        <p style={{ margin: 0, fontFamily: FONT_BODY, fontSize: 13, color: 'rgba(255,255,255,0.72)' }}>N° {orderNo} · {payLabel} · {fcfa(total)}</p>
+      </div>
+
+      {/* reveal / order card */}
+      <div style={{ margin: '24px 18px 0' }}>
+        <div style={{ background: K.paper, borderRadius: 24, overflow: 'hidden', border: `1px solid ${K.hair}`, boxShadow: '0 20px 40px rgba(12,52,38,0.18)' }}>
+          {isMystery && (
+            <div style={{ position: 'relative', height: 188, overflow: 'hidden' }}>
+              {!revealed ? (
+                <MysteryVisual variant="flou" height={188} big />
+              ) : (
+                <div className="kfade" style={{ position: 'absolute', inset: 0 }}>
+                  <FoodImg preset="buffet" height={188} label="photo · buffet du partenaire" />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 30%, rgba(12,52,38,0.85))' }} />
+                  <div style={{ position: 'absolute', left: 16, right: 16, bottom: 14 }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginBottom: 6 }}>
+                      <Chip tone="gold" icon="star">5★ dévoilé</Chip>
+                    </div>
+                    <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 21, color: '#fff', letterSpacing: -0.4, lineHeight: 1.1 }}>{offer.reveal}</div>
+                    <div style={{ fontFamily: FONT_BODY, fontSize: 12, color: 'rgba(255,255,255,0.78)', marginTop: 2 }}>{offer.revealHint}</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <div style={{ padding: 18 }}>
+            {isMystery && !revealed ? (
+              <div style={{ textAlign: 'center' }}>
+                <h3 style={{ margin: '0 0 4px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: K.ink }}>Votre hôtel mystère</h3>
+                <p style={{ margin: '0 0 14px', fontFamily: FONT_BODY, fontSize: 12.5, color: K.muted }}>L’établissement 5★ qui a préparé votre commande.</p>
+                <Btn kind="gold" size="md" full icon="sparkle" onClick={() => setRevealed(true)}>Dévoiler l’hôtel</Btn>
+              </div>
+            ) : (
+              <div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: 0.8, color: K.gold, textTransform: 'uppercase', marginBottom: 4 }}>{isMystery ? 'Préparé par' : offer.source}</div>
+                <h3 style={{ margin: '0 0 12px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: K.ink }}>{offer.teaser}</h3>
+                {/* tracking mini */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: K.cream, borderRadius: 14, padding: '12px 14px' }}>
+                  <div style={{ width: 42, height: 42, borderRadius: 12, background: K.forest, color: K.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon name="moto" size={24} stroke={2} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13.5, color: K.ink }}>Le livreur arrive</div>
+                    <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>Estimation 25–35 min · suivi en direct</div>
+                  </div>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 12, color: K.fresh }}>
+                    <span className="kdot" style={{ width: 7, height: 7, borderRadius: 9, background: K.fresh }} />En route
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* eco gain */}
+        <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+          <MiniStat icon="leaf" big="1" sub="repas sauvé" tone={K.fresh} wash={K.freshWash} />
+          <MiniStat icon="tag" big={`${Math.round((1 - offer.from / offer.original) * 100)}%`} sub="économisé" tone={K.amber} wash="#FBEDE2" />
+        </div>
+      </div>
+
+      {/* actions */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px 14px',
+        background: 'rgba(245,239,227,0.92)', backdropFilter: 'blur(12px)', borderTop: `1px solid ${K.hair}`, display: 'flex', gap: 10 }}>
+        <Btn kind="soft" size="lg" onClick={onHome} style={{ flexShrink: 0 }} icon="home"> </Btn>
+        <Btn kind="primary" size="lg" full iconR="arrowR" onClick={onTrack}>Suivre la commande</Btn>
+      </div>
+    </div>
+  );
+}
+function MiniStat({ icon, big, sub, tone, wash }) {
+  return (
+    <div style={{ flex: 1, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 16, padding: '13px 15px', display: 'flex', alignItems: 'center', gap: 11 }}>
+      <div style={{ width: 36, height: 36, borderRadius: 10, background: wash, color: tone, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Icon name={icon} size={19} stroke={2.2} />
+      </div>
+      <div>
+        <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: K.ink, lineHeight: 1 }}>{big}</div>
+        <div style={{ fontFamily: FONT_BODY, fontSize: 10.5, color: K.muted }}>{sub}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Profile ───────────────────────────────────────────────────
+function ProfileScreen({ onOpenOrder, onPartner }) {
+  const menu = [
+    { icon: 'pin', label: 'Mes adresses', sub: 'Plateau · Bureau' },
+    { icon: 'wallet', label: 'Moyens de paiement', sub: 'Wave, Airtel, Espèces' },
+    { icon: 'diamond', label: 'Badge Diamant', sub: 'Accès premium activé', accent: K.gold },
+    { icon: 'bell', label: 'Notifications', sub: 'Offres près de vous' },
+    { icon: 'info', label: 'Aide & contact', sub: 'WhatsApp · 24/7' },
+  ];
+  return (
+    <div style={{ paddingTop: 56, paddingBottom: 24 }}>
+      {/* header */}
+      <div style={{ padding: '0 18px 18px' }}>
+        <h1 style={{ margin: '0 0 16px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Profil</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+          <div style={{ width: 58, height: 58, borderRadius: 18, background: `linear-gradient(140deg, ${K.forest}, ${K.forest2})`, color: K.goldSoft,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 24 }}>AD</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, color: K.ink }}>Aïssa Diallo</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 3, background: K.goldWash, padding: '3px 9px', borderRadius: 99 }}>
+              <Icon name="diamond" size={13} stroke={2} style={{ color: K.goldDeep }} />
+              <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 11, color: K.goldDeep }}>Membre Diamant</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3E impact */}
+      <div style={{ margin: '0 18px 22px', background: K.forest, borderRadius: 20, padding: '16px 18px', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+        {[['12', 'repas sauvés', 'leaf'], ['38 000', 'FCFA économisés', 'tag'], ['9 kg', 'CO₂ évité', 'sparkle']].map(([n, l, ic], i) => (
+          <div key={l} style={{ flex: 1, textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
+            <Icon name={ic} size={17} stroke={2} style={{ color: K.goldSoft, margin: '0 auto 5px' }} />
+            <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17, letterSpacing: -0.3 }}>{n}</div>
+            <div style={{ fontFamily: FONT_BODY, fontSize: 9.5, color: 'rgba(255,255,255,0.65)' }}>{l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* orders */}
+      <div style={{ padding: '0 18px' }}>
+        <SectionHead kicker="Historique" title="Mes commandes" accent={K.forest} icon="receipt" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 22 }}>
+          {PAST_ORDERS.map((o) => (
+            <div key={o.id} onClick={() => onOpenOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: 13, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 16, padding: 11, cursor: 'pointer' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset={o.preset} height={52} /></div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: K.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.title}</div>
+                <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>{o.source} · {o.date}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, color: K.ink }}>{fcfa(o.total)}</div>
+                <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 10, color: K.fresh }}>{o.status}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* menu */}
+      <div style={{ padding: '0 18px' }}>
+        <div style={{ background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 18, overflow: 'hidden' }}>
+          {menu.map((m, i) => (
+            <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '13px 15px', borderTop: i ? `1px solid ${K.hair}` : 'none', cursor: 'pointer' }}>
+              <div style={{ width: 36, height: 36, borderRadius: 11, background: K.cream, color: m.accent || K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon name={m.icon} size={19} stroke={2} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 14, color: K.ink }}>{m.label}</div>
+                <div style={{ fontFamily: FONT_BODY, fontSize: 11, color: K.muted }}>{m.sub}</div>
+              </div>
+              <Icon name="chevR" size={18} stroke={2} style={{ color: K.muted }} />
+            </div>
+          ))}
+        </div>
+        <button onClick={onPartner} style={{ width: '100%', marginTop: 14, background: 'none', border: 'none', cursor: 'pointer',
+          fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: K.gold, padding: 8 }}>Devenir partenaire Kaani →</button>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { ConfirmScreen, MiniStat, ProfileScreen });
+
+</script>
+<script type="text/babel" data-module="app/screens4.jsx">
+// ── Kaani · Screens 4 — B2B "Devenir Partenaire" ──────────────
+
+function PartnerScreen({ onBack, embedded = false }) {
+  const [sent, setSent] = React.useState(false);
+  const [form, setForm] = React.useState({ name: '', place: '', phone: '' });
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const ready = form.name && form.place && form.phone;
+
+  const E = [
+    { icon: 'leaf', t: 'Écologie', s: 'Réduisez vos déchets alimentaires', tone: K.fresh, wash: K.freshWash },
+    { icon: 'tag', t: 'Économies', s: 'Transformez vos pertes en revenus', tone: K.amber, wash: '#FBEDE2' },
+    { icon: 'sparkle', t: 'Plaisir', s: 'Faites rayonner votre cuisine', tone: K.gold, wash: K.goldWash },
+  ];
+  const steps = [
+    ['Inscrivez votre établissement', 'Hôtel, restaurant ou pâtisserie — en 2 minutes.'],
+    ['Publiez vos invendus du jour', 'Photo, quantité, créneau de retrait.'],
+    ['On s’occupe de la livraison', 'Nos livreurs moto récupèrent et livrent.'],
+  ];
+
+  return (
+    <div style={{ position: 'relative', paddingBottom: 30 }}>
+      {!embedded && <TopBar onBack={onBack} light />}
+      {/* hero */}
+      <div style={{ position: 'relative', padding: (embedded ? '76px' : '104px') + ' 22px 26px', overflow: 'hidden',
+        background: `linear-gradient(160deg, ${K.forest} 0%, ${K.forestDeep} 100%)` }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(226,193,115,0.1)' }} />
+        <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: 1.6, color: K.goldSoft, textTransform: 'uppercase' }}>Espace Partenaire · B2B</span>
+        <h1 style={{ margin: '10px 0 12px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, lineHeight: 1.05, letterSpacing: -0.8, color: '#fff' }}>
+          Ne jetez plus vos invendus,<br /><span style={{ color: K.goldSoft }}>valorisez-les.</span>
+        </h1>
+        <p style={{ margin: '0 0 4px', fontFamily: FONT_BODY, fontSize: 13.5, lineHeight: 1.5, color: 'rgba(255,255,255,0.74)', maxWidth: 300 }}>
+          Rejoignez les hôtels, restaurants et pâtisseries de Niamey qui transforment leurs surplus en valeur.
+        </p>
+        <div style={{ display: 'flex', gap: 20, marginTop: 18 }}>
+          {[['+40', 'partenaires'], ['12 000', 'repas sauvés'], ['4.9★', 'satisfaction']].map(([n, l]) => (
+            <div key={l}>
+              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, color: '#fff', letterSpacing: -0.4 }}>{n}</div>
+              <div style={{ fontFamily: FONT_BODY, fontSize: 10.5, color: 'rgba(255,255,255,0.6)' }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 3E */}
+      <div style={{ padding: '22px 18px 0' }}>
+        <SectionHead kicker="La règle des 3 E" title="Pourquoi Kaani ?" accent={K.gold} icon="sparkle" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+          {E.map((e) => (
+            <div key={e.t} style={{ display: 'flex', alignItems: 'center', gap: 14, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 18, padding: '14px 16px' }}>
+              <div style={{ width: 46, height: 46, borderRadius: 14, background: e.wash, color: e.tone, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Icon name={e.icon} size={24} stroke={2} />
+              </div>
+              <div>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: K.ink }}>{e.t}</div>
+                <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: K.ink2 }}>{e.s}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* how it works */}
+      <div style={{ padding: '24px 18px 0' }}>
+        <SectionHead kicker="Simple & rapide" title="Comment ça marche" accent={K.forest} icon="moto" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {steps.map(([t, s], i) => (
+            <div key={t} style={{ display: 'flex', gap: 14, paddingBottom: i < 2 ? 18 : 0 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: K.forest, color: K.goldSoft, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, flexShrink: 0 }}>{i + 1}</div>
+                {i < 2 && <div style={{ width: 2, flex: 1, background: K.hair, marginTop: 4 }} />}
+              </div>
+              <div style={{ paddingTop: 4 }}>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: K.ink }}>{t}</div>
+                <div style={{ fontFamily: FONT_BODY, fontSize: 12.5, color: K.ink2, marginTop: 2 }}>{s}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* form */}
+      <div style={{ margin: '26px 18px 0', background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 22, padding: 20 }}>
+        {sent ? (
+          <div style={{ textAlign: 'center', padding: '20px 0' }}>
+            <div className="kpop" style={{ width: 58, height: 58, borderRadius: '50%', margin: '0 auto 14px', background: K.freshWash, color: K.fresh, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="check" size={30} stroke={3} />
+            </div>
+            <h3 style={{ margin: '0 0 6px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, color: K.ink }}>Demande envoyée !</h3>
+            <p style={{ margin: 0, fontFamily: FONT_BODY, fontSize: 13, color: K.muted }}>Notre équipe vous rappelle sous 24h, {form.name.split(' ')[0] || ''}.</p>
+          </div>
+        ) : (
+          <>
+            <h3 style={{ margin: '0 0 4px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 19, color: K.ink }}>Rejoindre Kaani</h3>
+            <p style={{ margin: '0 0 16px', fontFamily: FONT_BODY, fontSize: 12.5, color: K.muted }}>Laissez vos coordonnées, on vous rappelle.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+              <Field label="Votre nom" placeholder="Ex. Ibrahim Maïga" value={form.name} onChange={set('name')} />
+              <Field label="Établissement" placeholder="Hôtel, restaurant, pâtisserie…" value={form.place} onChange={set('place')} />
+              <Field label="Téléphone" placeholder="+227 90 00 00 00" value={form.phone} onChange={set('phone')} icon="phone" />
+            </div>
+            <div style={{ marginTop: 16 }}>
+              <Btn kind="gold" size="lg" full icon="store" onClick={() => ready && setSent(true)} style={{ opacity: ready ? 1 : 0.55 }}>Devenir partenaire</Btn>
+            </div>
+            <button style={{ width: '100%', marginTop: 12, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, fontFamily: FONT_BODY, fontWeight: 700, fontSize: 13, color: K.forest }}>
+              <Icon name="phone" size={16} stroke={2.2} />Ou appelez-nous directement
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, placeholder, value, onChange, icon }) {
+  return (
+    <div>
+      <label style={{ display: 'block', fontFamily: FONT_BODY, fontWeight: 600, fontSize: 11.5, color: K.ink2, marginBottom: 5 }}>{label}</label>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, height: 48, background: K.cream, border: `1px solid ${K.hair}`, borderRadius: 13, padding: '0 14px' }}>
+        {icon && <Icon name={icon} size={18} stroke={2} style={{ color: K.muted }} />}
+        <input value={value} onChange={onChange} placeholder={placeholder}
+          style={{ border: 'none', outline: 'none', background: 'none', flex: 1, fontFamily: FONT_BODY, fontSize: 14.5, color: K.ink }} />
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { PartnerScreen, Field });
+
+</script>
+<script type="text/babel" data-module="app/app.jsx">
+// ── Kaani · App shell — routing, bottom nav, orders, tweaks ────
+
+// Orders tab
+function OrdersScreen({ onHome }) {
+  return (
+    <div style={{ paddingTop: 56, paddingBottom: 24 }}>
+      <div style={{ padding: '0 18px' }}>
+        <h1 style={{ margin: '0 0 16px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Commandes</h1>
+      </div>
+
+      {/* active order tracking */}
+      <div style={{ padding: '0 18px' }}>
+        <div style={{ background: K.forest, borderRadius: 22, overflow: 'hidden', color: '#fff', marginBottom: 22 }}>
+          <div style={{ position: 'relative', height: 132, overflow: 'hidden' }}>
+            {/* faux map */}
+            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(135deg, #16533D, ${K.forestDeep})` }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 26px), repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 26px)' }} />
+            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} viewBox="0 0 360 132" preserveAspectRatio="none">
+              <path d="M40 104 C 120 104, 130 40, 220 40 S 320 56, 330 30" fill="none" stroke={K.goldSoft} strokeWidth="2.5" strokeDasharray="6 6" />
+            </svg>
+            <div style={{ position: 'absolute', left: 32, bottom: 92, width: 14, height: 14, borderRadius: '50%', background: '#fff', border: `3px solid ${K.forest}` }} />
+            <div className="kfloat" style={{ position: 'absolute', left: 196, top: 26, width: 34, height: 34, borderRadius: 11, background: K.goldSoft, color: K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="moto" size={20} stroke={2.2} />
+            </div>
+          </div>
+          <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 46, height: 46, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset="mystery" height={46} /></div>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                <span className="kdot" style={{ width: 7, height: 7, borderRadius: 9, background: K.goldSoft }} />
+                <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 11, color: K.goldSoft }}>En livraison · 12 min</span>
+              </div>
+              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: '#fff' }}>Buffet Mystère du Soir</div>
+              <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>Moussa · Yamaha · +227 90 ••</div>
+            </div>
+            <button style={{ width: 40, height: 40, borderRadius: 12, border: 'none', background: K.goldSoft, color: K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <Icon name="phone" size={20} stroke={2.2} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* history */}
+      <div style={{ padding: '0 18px' }}>
+        <SectionHead kicker="Historique" title="Commandes passées" accent={K.forest} icon="receipt" />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {PAST_ORDERS.map((o) => (
+            <div key={o.id} style={{ display: 'flex', alignItems: 'center', gap: 13, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 16, padding: 11 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset={o.preset} height={52} /></div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: K.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{o.title}</div>
+                <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: K.muted }}>{o.source} · {o.date}</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, color: K.ink }}>{fcfa(o.total)}</div>
+                <button style={{ border: 'none', background: 'none', padding: 0, marginTop: 2, cursor: 'pointer', fontFamily: FONT_BODY, fontWeight: 700, fontSize: 10.5, color: K.forest }}>Recommander</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Bottom navigation
+function BottomNav({ tab, onTab }) {
+  const items = [
+    { id: 'home', icon: 'home', label: 'Accueil' },
+    { id: 'search', icon: 'search', label: 'Recherche' },
+    { id: 'orders', icon: 'receipt', label: 'Commandes' },
+    { id: 'partner', icon: 'store', label: 'Partenaire' },
+    { id: 'profile', icon: 'user', label: 'Profil' },
+  ];
+  return (
+    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 40,
+      paddingBottom: 26, paddingTop: 8, background: 'linear-gradient(180deg, rgba(245,239,227,0), rgba(245,239,227,0.96) 38%)' }}>
+      <div style={{ margin: '0 14px', height: 60, background: 'rgba(255,255,255,0.86)', backdropFilter: 'blur(16px)',
+        border: `1px solid ${K.hair}`, borderRadius: 22, boxShadow: '0 10px 30px rgba(12,52,38,0.12)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '0 6px' }}>
+        {items.map((it) => {
+          const on = tab === it.id;
+          return (
+            <button key={it.id} onClick={() => onTab(it.id)} style={{ flex: 1, height: 48, border: 'none', background: 'none', cursor: 'pointer',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+              color: on ? K.forest : K.muted, position: 'relative' }}>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {on && <span style={{ position: 'absolute', width: 36, height: 30, borderRadius: 10, background: K.freshWash }} />}
+                <Icon name={it.icon} size={21} stroke={on ? 2.3 : 2} style={{ position: 'relative' }} />
+              </div>
+              <span style={{ fontFamily: FONT_BODY, fontWeight: on ? 700 : 600, fontSize: 9.5, letterSpacing: 0.1 }}>{it.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Palettes for the Tweaks "Direction visuelle" ──────────────
+const PALETTES = {
+  // [forestDeep, forest, forest2, gold, goldSoft, goldDeep]
+  'Forêt & Or':     ['#0C3426', '#0E3B2C', '#16533D', '#C79A3E', '#E2C173', '#9A7320'],
+  'Émeraude':       ['#073A29', '#0A4D36', '#127A56', '#C79A3E', '#E6C97E', '#8C6A1A'],
+  'Nuit & Cuivre':  ['#0E2620', '#13322B', '#1E4A40', '#BC7338', '#E2A56B', '#8A4E20'],
+};
+function applyPalette(arr) {
+  const [fd, f, f2, g, gs, gd] = arr;
+  Object.assign(K, { forestDeep: fd, forest: f, forest2: f2, gold: g, goldSoft: gs, goldDeep: gd });
+}
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "mystery": "Flouté",
+  "palette": ['#0C3426', '#0E3B2C', '#16533D', '#C79A3E', '#E2C173', '#9A7320']
+}/*EDITMODE-END*/;
+
+const MYSTERY_MAP = { 'Flouté': 'flou', 'Voile or': 'voile', 'Scellé': 'scelle' };
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [, force] = React.useState(0);
+  React.useEffect(() => { applyPalette(t.palette); force((n) => n + 1); }, [JSON.stringify(t.palette)]);
+
+  const mysteryVariant = MYSTERY_MAP[t.mystery] || 'flou';
+
+  const [tab, setTab] = React.useState('home');
+  const [route, setRoute] = React.useState(null); // overlay flow
+  const scrollRef = React.useRef(null);
+
+  const go = (r) => { setRoute(r); if (scrollRef.current) scrollRef.current.scrollTop = 0; };
+  const goTab = (id) => { setRoute(null); setTab(id); if (scrollRef.current) scrollRef.current.scrollTop = 0; };
+
+  const openOffer = (offer) => go({ name: 'detail', offer });
+  const order = (offer, qty) => go({ name: 'payment', cart: { offer, qty } });
+  const confirm = (cart, pay, total) => go({ name: 'confirm', cart, pay, total });
+
+  // tab content
+  let tabScreen;
+  if (tab === 'home') tabScreen = <HomeScreen onOpen={openOffer} onSearch={() => goTab('search')} onPartner={() => goTab('partner')} mysteryVariant={mysteryVariant} />;
+  else if (tab === 'search') tabScreen = <SearchScreen onOpen={openOffer} mysteryVariant={mysteryVariant} />;
+  else if (tab === 'orders') tabScreen = <OrdersScreen onHome={() => goTab('home')} />;
+  else if (tab === 'partner') tabScreen = <PartnerScreen embedded />;
+  else if (tab === 'profile') tabScreen = <ProfileScreen onOpenOrder={() => goTab('orders')} onPartner={() => goTab('partner')} />;
+
+  // overlay content
+  let overlay = null;
+  if (route?.name === 'detail') overlay = <DetailScreen offer={route.offer} mysteryVariant={mysteryVariant} onBack={() => setRoute(null)} onOrder={order} />;
+  else if (route?.name === 'payment') overlay = <PaymentScreen cart={route.cart} onBack={() => go({ name: 'detail', offer: route.cart.offer })} onConfirm={confirm} />;
+  else if (route?.name === 'confirm') overlay = <ConfirmScreen cart={route.cart} pay={route.pay} total={route.total} onTrack={() => goTab('orders')} onHome={() => goTab('home')} />;
+
+  // status-bar text color: white over dark headers, black over light screens
+  const darkTops = { detail: true, payment: false, confirm: true };
+  const statusDark = route ? !!darkTops[route.name] : (tab === 'home' || tab === 'partner');
+
+  return (
+    <IOSDevice dark={statusDark}>
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: K.cream, fontFamily: FONT_BODY, color: K.ink }}>
+        {/* scroll region */}
+        <div ref={scrollRef} className="kscroll" style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', background: K.cream }}>
+          {overlay
+            ? <div key={route.name} className="kover" style={{ minHeight: '100%' }}>{overlay}</div>
+            : <div key={tab} className="kfade" style={{ minHeight: '100%', paddingBottom: 96 }}>{tabScreen}</div>}
+        </div>
+
+        {/* bottom nav only on tabs */}
+        {!overlay && <BottomNav tab={tab} onTab={goTab} />}
+      </div>
+
+      {/* Tweaks */}
+      <TweaksPanel>
+        <TweakSection label="Carte « Hôtel Mystère »" />
+        <TweakRadio label="Traitement" value={t.mystery} options={['Flouté', 'Voile or', 'Scellé']} onChange={(v) => setTweak('mystery', v)} />
+        <TweakSection label="Direction visuelle" />
+        <TweakColor label="Palette" value={t.palette}
+          options={Object.values(PALETTES)}
+          onChange={(v) => setTweak('palette', v)} />
+      </TweaksPanel>
+    </IOSDevice>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+</script>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#0E3B2C"/>
+    <circle cx="50" cy="42" r="20" fill="none" stroke="#E2C173" stroke-width="3"/>
+    <text x="50" y="52" font-size="26" fill="#E2C173" text-anchor="middle" font-family="serif" font-weight="bold">?</text>
+    <text x="50" y="82" font-size="13" fill="#fff" text-anchor="middle" font-family="sans-serif" font-weight="bold">Kaani</text>
+  </svg>
+</template>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# Déploiement Netlify (connexion Git) — voir aussi le README.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# L'app est une SPA (une seule page) : tout chemin renvoie vers index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
