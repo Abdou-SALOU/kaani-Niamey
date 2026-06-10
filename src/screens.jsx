@@ -147,7 +147,7 @@ function HomeHeader({ onSearch }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
         <Icon name="pin" size={15} stroke={2} style={{ color: K.goldSoft }} />
         <span style={{ fontFamily: FONT_BODY, fontSize: 13, color: 'rgba(255,255,255,0.78)' }}>Livré à</span>
-        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: '#fff' }}>Niamey · Plateau</span>
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: '#fff' }}>Niamey · Francophonie</span>
         <Icon name="chevD" size={15} stroke={2.2} style={{ color: 'rgba(255,255,255,0.7)' }} />
       </div>
       <button onClick={onSearch} style={{ width: '100%', height: 50, borderRadius: 15, border: 'none', cursor: 'pointer',
@@ -460,7 +460,7 @@ export function PaymentScreen({ cart, onBack, onConfirm }) {
               <Icon name="clock" size={13} stroke={2.2} />25–35 min
             </span>
           </div>
-          <InfoRow icon="pin" title="Plateau, Niamey" sub="Rue PL-12 · près du rond-point" />
+          <InfoRow icon="pin" title="Francophonie, Niamey" sub="Près du grand rond-point" />
           <div style={{ height: 1, background: K.hair, margin: '13px 0' }} />
           <InfoRow icon="moto" title="Suivi en direct" sub="Position du livreur partagée in-app" accent={K.amber} />
         </div>
@@ -613,7 +613,7 @@ export function ConfirmScreen({ cart, pay, total, onTrack, onHome }) {
 // ── Profile ───────────────────────────────────────────────────
 export function ProfileScreen({ onOpenOrder, onPartner }) {
   const menu = [
-    { icon: 'pin', label: 'Mes adresses', sub: 'Plateau · Bureau' },
+    { icon: 'pin', label: 'Mes adresses', sub: 'Francophonie · Bureau' },
     { icon: 'wallet', label: 'Moyens de paiement', sub: 'Wave, Airtel, Espèces' },
     { icon: 'diamond', label: 'Badge Diamant', sub: 'Accès premium activé', accent: K.gold },
     { icon: 'bell', label: 'Notifications', sub: 'Offres près de vous' },
