@@ -86,6 +86,7 @@ Poussez le projet sur GitHub puis « New site / project ». La config est déjà
 | `src/App.jsx`              | Coquille responsive, navigation du bas, routage des écrans   |
 | `src/ds.jsx`               | Design system : couleurs, typographies, icônes, composants   |
 | `src/data.js`              | Données de démonstration (offres, paiements, commandes)      |
+| `src/store.jsx`            | État global persistant (favoris, commandes, impact) via `localStorage` |
 | `src/screens.jsx`          | Tous les écrans (accueil, recherche, détail, paiement…)      |
 | `src/styles.css`           | Styles globaux + cadre responsive (plein écran / centré)     |
 | `public/`                  | Icônes PWA, favicon, robots.txt                              |
@@ -98,8 +99,28 @@ Poussez le projet sur GitHub puis « New site / project ». La config est déjà
 
 Accueil (Hôtel Mystère, Badge Diamant, Pâtisseries) · Recherche · Détail d'offre ·
 Paiement (Espèces, Wave, Airtel/Moov Money, Nita, Amana, Zamani) · Confirmation avec
-dévoilement de l'hôtel mystère · Commandes (suivi + historique) · Profil (impact
-écologique) · Espace Partenaire B2B.
+dévoilement de l'hôtel mystère · Commandes (suivi + historique) · Favoris · Profil
+(impact écologique) · Espace Partenaire B2B.
+
+## Fonctionnalités interactives (persistées)
+
+L'app n'est plus une simple maquette : l'état est **réel et conservé** entre les
+sessions via `localStorage` (voir `src/store.jsx`, un `Context` React).
+
+- **Favoris ❤️** — touchez le cœur sur n'importe quelle offre pour la sauvegarder.
+  Compteur/badge dans l'en-tête, écran **Favoris** dédié, état conservé au rechargement.
+- **Commandes réelles** — une commande confirmée est enregistrée puis alimente
+  automatiquement l'onglet **Commandes** (suivi de la plus récente + historique) et le
+  **Profil**. « Recommander » rouvre l'offre.
+- **Impact écologique calculé** — repas sauvés, FCFA économisés et CO₂ évité sont
+  **dérivés des commandes** (plus de chiffres codés en dur).
+- **Recherche** — tri par pertinence / prix / distance / réduction, compteur de
+  résultats, et « Près de moi » trié par distance.
+- **Accessibilité** — `aria-label` / `aria-pressed` sur les boutons-icônes (favoris,
+  navigation, tri…).
+
+> Les données de démonstration (offres, historique initial) restent illustratives ;
+> seul l'état utilisateur (favoris, commandes passées dans l'app) est persisté.
 
 ## Stack technique
 
@@ -134,4 +155,6 @@ npm run icons
 ## Notes
 
 - C'est une **démo fonctionnelle** : aucun paiement réel n'est effectué et il n'y a pas
-  encore de backend. Étape suivante possible : comptes, base de données, offres en temps réel.
+  encore de backend. L'état utilisateur (favoris, commandes, impact) est conservé
+  **localement** (`localStorage`). Étape suivante possible : comptes, base de données,
+  offres en temps réel, synchronisation multi-appareils.

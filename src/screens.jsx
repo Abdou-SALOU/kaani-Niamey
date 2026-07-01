@@ -5,11 +5,47 @@ import {
   Icon, FoodImg, Chip, Btn, Portions, Price, SectionHead, Wordmark,
 } from './ds.jsx';
 import {
-  MYSTERY, DIAMOND, PASTRY, ALL, DELIVERY_FEE, PAYMENTS, PAST_ORDERS,
+  MYSTERY, DIAMOND, PASTRY, ALL, DELIVERY_FEE, PAYMENTS, findOffer,
 } from './data.js';
+import { useStore } from './store.jsx';
 
 // iPhone home-indicator clearance for sticky bottom bars.
 const SAFE_BOTTOM = (base) => `12px 16px calc(${base}px + env(safe-area-inset-bottom, 0px))`;
+
+// Discount headline, e.g. -80 %, from an offer's from/original prices.
+const discount = (o) => Math.round((1 - o.from / o.original) * 100);
+
+// ── Favorite toggle ───────────────────────────────────────────
+// Circular heart button used on every card and in the detail top bar.
+// `light` = overlaid on a photo (glassy). Stops propagation so tapping the
+// heart never opens the card behind it.
+function FavBtn({ id, light = false, size = 32, style = {} }) {
+  const { isFav, toggleFav } = useStore();
+  const on = isFav(id);
+  return (
+    <button
+      type="button"
+      aria-label={on ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      aria-pressed={on}
+      onClick={(e) => { e.stopPropagation(); toggleFav(id); }}
+      style={{
+        width: size, height: size, borderRadius: '50%', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+        background: light ? 'rgba(20,40,30,0.32)' : K.paper,
+        color: on ? '#E7574F' : (light ? '#fff' : K.muted),
+        border: light ? '1px solid rgba(255,255,255,0.28)' : `1px solid ${K.hair}`,
+        backdropFilter: 'blur(6px)',
+        boxShadow: light ? 'none' : '0 2px 8px rgba(0,0,0,0.08)',
+        transition: 'transform .12s ease',
+        ...style,
+      }}
+      onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.85)')}
+      onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}>
+      <Icon name="heart" size={size * 0.54} stroke={2} filled={on} />
+    </button>
+  );
+}
 
 // ── Mystery visual treatment ──────────────────────────────────
 function MysteryVisual({ variant = 'flou', height = 186, big = false }) {
@@ -78,11 +114,9 @@ function MysteryCard({ offer, variant, onOpen, big = false }) {
         <div style={{ position: 'absolute', top: big ? 9 : 11, left: big ? 9 : 11 }}>
           <Chip tone="gold" icon="star" style={big ? { height: 21, fontSize: 10.5 } : {}}>5★ Mystère</Chip>
         </div>
-        {!big && (
-          <div style={{ position: 'absolute', top: 11, right: 11 }}>
-            <Chip tone="eco" icon="leaf">Anti-gaspi</Chip>
-          </div>
-        )}
+        <div style={{ position: 'absolute', top: big ? 8 : 10, right: big ? 8 : 10 }}>
+          <FavBtn id={offer.id} light size={big ? 28 : 32} />
+        </div>
       </div>
       <div style={{ padding: big ? '11px 12px 13px' : 15, display: 'flex', flexDirection: 'column', flex: 1 }}>
         <h3 style={{ margin: big ? '0 0 9px' : '0 0 5px', fontFamily: FONT_DISPLAY, fontWeight: 700,
@@ -119,15 +153,18 @@ function OfferCard({ offer, onOpen, grid = false }) {
       boxShadow: '0 6px 16px rgba(20,40,30,0.06)' }}>
       <div style={{ position: 'relative' }}>
         <FoodImg preset={offer.preset} img={offer.img} height={grid ? 116 : 124} />
-        <div style={{ position: 'absolute', top: 9, left: 9 }}>
-          <Chip tone="dark" style={{ height: 21, fontSize: 10.5 }}>-{Math.round((1 - offer.from / offer.original) * 100)}%</Chip>
+        <div style={{ position: 'absolute', top: 9, left: 9, display: 'flex', gap: 6 }}>
+          <Chip tone="dark" style={{ height: 21, fontSize: 10.5 }}>-{discount(offer)}%</Chip>
+          {offer.kind === 'diamond' && (
+            <span style={{ width: 21, height: 21, borderRadius: '50%', background: 'rgba(255,255,255,0.92)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: K.diamond }}>
+              <Icon name="diamond" size={12} stroke={2} />
+            </span>
+          )}
         </div>
-        {offer.kind === 'diamond' && (
-          <div style={{ position: 'absolute', top: 9, right: 9, width: 24, height: 24, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: K.diamond }}>
-            <Icon name="diamond" size={14} stroke={2} />
-          </div>
-        )}
+        <div style={{ position: 'absolute', top: 8, right: 8 }}>
+          <FavBtn id={offer.id} light size={28} />
+        </div>
       </div>
       <div style={{ padding: '11px 12px 13px' }}>
         <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: 0.6, color: K.gold, textTransform: 'uppercase', marginBottom: 3 }}>{offer.source}</div>
@@ -149,7 +186,8 @@ function OfferCard({ offer, onOpen, grid = false }) {
 const iconBtnGlass = { width: 40, height: 40, borderRadius: 12, border: '1px solid rgba(255,255,255,0.25)',
   background: 'rgba(255,255,255,0.12)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' };
 
-function HomeHeader({ onSearch }) {
+function HomeHeader({ onSearch, onFavorites }) {
+  const { favCount } = useStore();
   return (
     <div style={{ padding: 'max(env(safe-area-inset-top, 0px), 52px) 18px 16px', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forest} 62%, ${K.forest})`,
       borderRadius: '0 0 26px 26px', position: 'relative', overflow: 'hidden' }}>
@@ -157,8 +195,15 @@ function HomeHeader({ onSearch }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <Wordmark size={23} light />
         <div style={{ display: 'flex', gap: 9 }}>
-          <button style={iconBtnGlass}><Icon name="heart" size={19} stroke={2} /></button>
-          <button style={iconBtnGlass}><Icon name="bell" size={19} stroke={2} /></button>
+          <button onClick={onFavorites} aria-label={`Favoris${favCount ? ` (${favCount})` : ''}`} style={{ ...iconBtnGlass, position: 'relative' }}>
+            <Icon name="heart" size={19} stroke={2} filled={favCount > 0} />
+            {favCount > 0 && (
+              <span style={{ position: 'absolute', top: -5, right: -5, minWidth: 18, height: 18, padding: '0 4px', borderRadius: 9,
+                background: '#E7574F', color: '#fff', fontFamily: FONT_BODY, fontWeight: 700, fontSize: 10.5,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1.5px solid ${K.forest}` }}>{favCount}</span>
+            )}
+          </button>
+          <button aria-label="Notifications" style={iconBtnGlass}><Icon name="bell" size={19} stroke={2} /></button>
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
@@ -202,10 +247,10 @@ function ThreeE() {
   );
 }
 
-export function HomeScreen({ onOpen, onSearch, onPartner, mysteryVariant }) {
+export function HomeScreen({ onOpen, onSearch, onPartner, onFavorites, mysteryVariant }) {
   return (
     <div style={{ paddingBottom: 24 }}>
-      <HomeHeader onSearch={onSearch} />
+      <HomeHeader onSearch={onSearch} onFavorites={onFavorites} />
       <ThreeE />
 
       {/* Hôtel Mystère */}
@@ -240,7 +285,7 @@ export function HomeScreen({ onOpen, onSearch, onPartner, mysteryVariant }) {
       {/* Pâtisseries de Chefs */}
       <div style={{ padding: '26px 18px 0' }}>
         <SectionHead kicker="Sucré · prix cassés" title="Pâtisseries de Chefs" action="Tout voir" onAction={onSearch} icon="sparkle" accent={K.amber} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
+        <div className="kgrid" style={{ gap: 13 }}>
           {PASTRY.map((o) => <OfferCard key={o.id} offer={o} onOpen={onOpen} grid />)}
         </div>
       </div>
@@ -262,34 +307,72 @@ export function HomeScreen({ onOpen, onSearch, onPartner, mysteryVariant }) {
 }
 
 // ── Search screen ─────────────────────────────────────────────
+const SORTS = [
+  { id: 'reco', label: 'Pertinence' },
+  { id: 'price', label: 'Prix' },
+  { id: 'dist', label: 'Distance' },
+  { id: 'discount', label: 'Réduction' },
+];
+
 export function SearchScreen({ onOpen, mysteryVariant }) {
   const [q, setQ] = React.useState('');
   const cats = ['Tout', 'Hôtel Mystère', 'Buffets 5★', 'Pâtisseries', 'Près de moi'];
   const [cat, setCat] = React.useState('Tout');
-  let results = ALL;
-  if (cat === 'Hôtel Mystère') results = MYSTERY;
-  else if (cat === 'Buffets 5★') results = DIAMOND;
-  else if (cat === 'Pâtisseries') results = PASTRY;
-  if (q) results = results.filter((o) => (o.teaser + (o.source || '')).toLowerCase().includes(q.toLowerCase()));
+  const [sort, setSort] = React.useState('reco');
+
+  const results = React.useMemo(() => {
+    let base = ALL;
+    if (cat === 'Hôtel Mystère') base = MYSTERY;
+    else if (cat === 'Buffets 5★') base = DIAMOND;
+    else if (cat === 'Pâtisseries') base = PASTRY;
+    const needle = q.trim().toLowerCase();
+    let list = needle
+      ? base.filter((o) => (o.teaser + ' ' + (o.source || o.revealHint || '')).toLowerCase().includes(needle))
+      : base.slice();
+    // "Près de moi" trie d'office par distance.
+    const eff = cat === 'Près de moi' ? 'dist' : sort;
+    if (eff === 'price') list.sort((a, b) => a.from - b.from);
+    else if (eff === 'dist') list.sort((a, b) => a.dist - b.dist);
+    else if (eff === 'discount') list.sort((a, b) => discount(b) - discount(a));
+    return list;
+  }, [q, cat, sort]);
+
+  const nearby = cat === 'Près de moi';
   return (
     <div style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 56px)' }}>
       <div style={{ padding: '0 18px 8px' }}>
         <h1 style={{ margin: '0 0 14px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Rechercher</h1>
         <div style={{ height: 50, borderRadius: 15, background: K.paper, border: `1px solid ${K.hair}`, display: 'flex', alignItems: 'center', gap: 10, padding: '0 15px' }}>
           <Icon name="search" size={20} stroke={2} style={{ color: K.muted }} />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buffet, pâtisserie, hôtel…"
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buffet, pâtisserie, hôtel…" aria-label="Rechercher une offre"
             style={{ border: 'none', outline: 'none', background: 'none', flex: 1, fontFamily: FONT_BODY, fontSize: 15, color: K.ink }} />
-          {q && <button onClick={() => setQ('')} style={{ border: 'none', background: 'none', color: K.muted, cursor: 'pointer' }}><Icon name="x" size={18} /></button>}
+          {q && <button onClick={() => setQ('')} aria-label="Effacer la recherche" style={{ border: 'none', background: 'none', color: K.muted, cursor: 'pointer' }}><Icon name="x" size={18} /></button>}
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 18px 14px' }} className="hscroll">
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '12px 18px 10px' }} className="hscroll">
         {cats.map((c) => (
           <button key={c} onClick={() => setCat(c)} style={{ flexShrink: 0, height: 36, padding: '0 16px', borderRadius: 99, cursor: 'pointer',
             border: `1px solid ${cat === c ? K.forest : K.hair}`, background: cat === c ? K.forest : K.paper,
             color: cat === c ? '#fff' : K.ink2, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 13 }}>{c}</button>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13, padding: '0 18px 20px' }}>
+
+      {/* result count + sort */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflowX: 'auto', padding: '2px 18px 14px' }} className="hscroll">
+        <span style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: FONT_BODY, fontWeight: 700, fontSize: 12, color: K.muted, paddingRight: 4 }}>
+          <Icon name="grid" size={13} stroke={2.2} />{results.length} offre{results.length > 1 ? 's' : ''}
+        </span>
+        {SORTS.map((s) => {
+          const on = nearby ? s.id === 'dist' : sort === s.id;
+          return (
+            <button key={s.id} onClick={() => setSort(s.id)} disabled={nearby} aria-pressed={on} style={{ flexShrink: 0, height: 30, padding: '0 12px', borderRadius: 99,
+              cursor: nearby ? 'default' : 'pointer', border: `1px solid ${on ? K.gold : K.hair}`, background: on ? K.goldWash : K.paper,
+              color: on ? K.goldDeep : K.muted, fontFamily: FONT_BODY, fontWeight: 600, fontSize: 12, opacity: nearby && !on ? 0.5 : 1 }}>{s.label}</button>
+          );
+        })}
+      </div>
+
+      <div className="kgrid" style={{ gap: 13, padding: '0 18px 20px' }}>
         {results.map((o) => o.kind === 'mystery'
           ? <MysteryCard key={o.id} offer={o} variant={mysteryVariant} onOpen={onOpen} big />
           : <OfferCard key={o.id} offer={o} onOpen={onOpen} grid />)}
@@ -299,8 +382,38 @@ export function SearchScreen({ onOpen, mysteryVariant }) {
   );
 }
 
+// ── Favoris ───────────────────────────────────────────────────
+export function FavoritesScreen({ onBack, onOpen, mysteryVariant }) {
+  const { favorites } = useStore();
+  const list = favorites.map(findOffer).filter(Boolean);
+  return (
+    <div style={{ position: 'relative', paddingTop: 'max(env(safe-area-inset-top, 0px), 92px)', paddingBottom: 30, minHeight: '100%' }}>
+      <TopBar onBack={onBack} title="Favoris" />
+      {list.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '60px 40px', color: K.muted }}>
+          <div style={{ width: 66, height: 66, borderRadius: '50%', margin: '0 auto 16px', background: K.paper, border: `1px solid ${K.hair}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#E7574F' }}>
+            <Icon name="heart" size={30} stroke={2} />
+          </div>
+          <h3 style={{ margin: '0 0 6px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: K.ink }}>Aucun favori pour l’instant</h3>
+          <p style={{ margin: 0, fontFamily: FONT_BODY, fontSize: 13, lineHeight: 1.5 }}>Touchez le cœur ❤️ sur une offre pour la retrouver ici en un geste.</p>
+        </div>
+      ) : (
+        <>
+          <p style={{ margin: '0 18px 14px', fontFamily: FONT_BODY, fontSize: 12.5, color: K.muted }}>{list.length} offre{list.length > 1 ? 's' : ''} sauvegardée{list.length > 1 ? 's' : ''}</p>
+          <div className="kgrid" style={{ gap: 13, padding: '0 18px 20px' }}>
+            {list.map((o) => o.kind === 'mystery'
+              ? <MysteryCard key={o.id} offer={o} variant={mysteryVariant} onOpen={onOpen} big />
+              : <OfferCard key={o.id} offer={o} onOpen={onOpen} grid />)}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Offer detail ──────────────────────────────────────────────
-function TopBar({ onBack, light = false, title, onShare }) {
+function TopBar({ onBack, light = false, title, right }) {
   const c = light ? '#fff' : K.ink;
   const bg = light ? 'rgba(255,255,255,0.16)' : K.paper;
   const bd = light ? 'rgba(255,255,255,0.3)' : K.hair;
@@ -309,9 +422,9 @@ function TopBar({ onBack, light = false, title, onShare }) {
   return (
     <div style={{ position: 'absolute', top: 'max(env(safe-area-inset-top, 0px), 52px)', left: 0, right: 0, zIndex: 30, display: 'flex', alignItems: 'center',
       justifyContent: 'space-between', padding: '0 16px' }}>
-      <button onClick={onBack} style={btn}><Icon name="chevL" size={20} stroke={2.3} /></button>
+      <button onClick={onBack} aria-label="Retour" style={btn}><Icon name="chevL" size={20} stroke={2.3} /></button>
       {title && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 16, color: c }}>{title}</span>}
-      <button style={btn} onClick={onShare}><Icon name="heart" size={19} stroke={2} /></button>
+      {right || <span style={{ width: 40, height: 40 }} aria-hidden="true" />}
     </div>
   );
 }
@@ -343,7 +456,7 @@ export function DetailScreen({ offer, mysteryVariant, onBack, onOrder }) {
       : ['Buffet complet du jour', 'Entrées · plats · desserts', 'Quantité généreuse'];
   return (
     <div style={{ position: 'relative', paddingBottom: 110 }}>
-      <TopBar onBack={onBack} light />
+      <TopBar onBack={onBack} light right={<FavBtn id={offer.id} light size={40} style={{ borderRadius: 12, background: 'rgba(255,255,255,0.16)' }} />} />
       {/* hero */}
       <div style={{ position: 'relative' }}>
         {isMystery
@@ -538,11 +651,36 @@ function MiniStat({ icon, big, sub, tone, wash }) {
 }
 
 export function ConfirmScreen({ cart, pay, total, onTrack, onHome }) {
-  const { offer } = cart;
+  const { addOrder } = useStore();
+  const { offer, qty } = cart;
   const isMystery = offer.kind === 'mystery';
   const [revealed, setRevealed] = React.useState(!isMystery);
   const payLabel = (PAYMENTS.find((p) => p.id === pay) || {}).label || 'Espèces';
   const [orderNo] = React.useState(() => 'KN-' + Math.floor(2000 + Math.random() * 7999));
+
+  // Persist the order once so it flows into Commandes + Profil (impact stats).
+  // addOrder de-dupes by id, so StrictMode's double-mount stays harmless.
+  React.useEffect(() => {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    addOrder({
+      id: orderNo,
+      offerId: offer.id,
+      title: offer.teaser,
+      source: isMystery ? offer.reveal : offer.source,
+      preset: offer.preset,
+      img: isMystery ? offer.revealImg : offer.img,
+      kind: offer.kind,
+      qty, total, pay,
+      meals: qty,
+      saved: (offer.original - offer.from) * qty,
+      date: `Aujourd’hui · ${hh}h${mm}`,
+      ts: now.getTime(),
+      status: 'En route',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div style={{ minHeight: '100%', background: `linear-gradient(180deg, ${K.forest} 0%, ${K.forestDeep} 46%, ${K.cream} 46%, ${K.cream} 100%)`,
       paddingTop: 'max(env(safe-area-inset-top, 0px), 76px)', paddingBottom: 120, position: 'relative' }}>
@@ -628,8 +766,16 @@ export function ConfirmScreen({ cart, pay, total, onTrack, onHome }) {
 }
 
 // ── Profile ───────────────────────────────────────────────────
-export function ProfileScreen({ onOpenOrder, onPartner }) {
+export function ProfileScreen({ onOpenOrder, onPartner, onFavorites }) {
+  const { orders, impact, favCount } = useStore();
+  const num = (n) => n.toLocaleString('fr-FR').replace(/\s/g, ' ');
+  const stats = [
+    [String(impact.meals), 'repas sauvés', 'leaf'],
+    [num(impact.saved), 'FCFA économisés', 'tag'],
+    [`${impact.co2} kg`, 'CO₂ évité', 'sparkle'],
+  ];
   const menu = [
+    { icon: 'heart', label: 'Favoris', sub: favCount ? `${favCount} offre${favCount > 1 ? 's' : ''} sauvegardée${favCount > 1 ? 's' : ''}` : 'Vos offres préférées', accent: '#E7574F', onClick: onFavorites },
     { icon: 'pin', label: 'Mes adresses', sub: 'Francophonie · Bureau' },
     { icon: 'wallet', label: 'Moyens de paiement', sub: 'Wave, Airtel, Espèces' },
     { icon: 'diamond', label: 'Badge Diamant', sub: 'Accès premium activé', accent: K.gold },
@@ -656,7 +802,7 @@ export function ProfileScreen({ onOpenOrder, onPartner }) {
 
       {/* 3E impact */}
       <div style={{ margin: '0 18px 22px', background: K.forest, borderRadius: 20, padding: '16px 18px', color: '#fff', display: 'flex', justifyContent: 'space-between' }}>
-        {[['12', 'repas sauvés', 'leaf'], ['38 000', 'FCFA économisés', 'tag'], ['9 kg', 'CO₂ évité', 'sparkle']].map(([n, l, ic], i) => (
+        {stats.map(([n, l, ic], i) => (
           <div key={l} style={{ flex: 1, textAlign: 'center', borderLeft: i ? '1px solid rgba(255,255,255,0.14)' : 'none' }}>
             <Icon name={ic} size={17} stroke={2} style={{ color: K.goldSoft, margin: '0 auto 5px' }} />
             <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 17, letterSpacing: -0.3 }}>{n}</div>
@@ -669,7 +815,7 @@ export function ProfileScreen({ onOpenOrder, onPartner }) {
       <div style={{ padding: '0 18px' }}>
         <SectionHead kicker="Historique" title="Mes commandes" accent={K.forest} icon="receipt" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 22 }}>
-          {PAST_ORDERS.map((o) => (
+          {orders.slice(0, 3).map((o) => (
             <div key={o.id} onClick={() => onOpenOrder(o)} style={{ display: 'flex', alignItems: 'center', gap: 13, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 16, padding: 11, cursor: 'pointer' }}>
               <div style={{ width: 52, height: 52, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset={o.preset} img={o.img} height={52} /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -689,7 +835,7 @@ export function ProfileScreen({ onOpenOrder, onPartner }) {
       <div style={{ padding: '0 18px' }}>
         <div style={{ background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 18, overflow: 'hidden' }}>
           {menu.map((m, i) => (
-            <div key={m.label} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '13px 15px', borderTop: i ? `1px solid ${K.hair}` : 'none', cursor: 'pointer' }}>
+            <div key={m.label} onClick={m.onClick} style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '13px 15px', borderTop: i ? `1px solid ${K.hair}` : 'none', cursor: 'pointer' }}>
               <div style={{ width: 36, height: 36, borderRadius: 11, background: K.cream, color: m.accent || K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Icon name={m.icon} size={19} stroke={2} />
               </div>
@@ -834,14 +980,30 @@ export function PartnerScreen({ onBack, embedded = false }) {
 }
 
 // ── Orders tab ────────────────────────────────────────────────
-export function OrdersScreen() {
+export function OrdersScreen({ onOpen }) {
+  const { orders } = useStore();
+  const active = orders[0];
+  const history = active ? orders.slice(1) : [];
+  const reorder = (o) => { const off = findOffer(o.offerId); if (off && onOpen) onOpen(off); };
   return (
     <div style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 56px)', paddingBottom: 24 }}>
       <div style={{ padding: '0 18px' }}>
         <h1 style={{ margin: '0 0 16px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 30, letterSpacing: -0.8, color: K.ink }}>Commandes</h1>
       </div>
 
+      {!active && (
+        <div style={{ textAlign: 'center', padding: '50px 40px', color: K.muted }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', margin: '0 auto 14px', background: K.paper, border: `1px solid ${K.hair}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: K.forest }}>
+            <Icon name="receipt" size={28} stroke={2} />
+          </div>
+          <h3 style={{ margin: '0 0 6px', fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 18, color: K.ink }}>Aucune commande</h3>
+          <p style={{ margin: 0, fontFamily: FONT_BODY, fontSize: 13 }}>Vos commandes et leur suivi apparaîtront ici.</p>
+        </div>
+      )}
+
       {/* active order tracking */}
+      {active && (
       <div style={{ padding: '0 18px' }}>
         <div style={{ background: K.forest, borderRadius: 22, overflow: 'hidden', color: '#fff', marginBottom: 22 }}>
           <div style={{ position: 'relative', height: 132, overflow: 'hidden' }}>
@@ -857,27 +1019,29 @@ export function OrdersScreen() {
             </div>
           </div>
           <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 46, height: 46, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset="mystery" height={46} /></div>
-            <div style={{ flex: 1 }}>
+            <div style={{ width: 46, height: 46, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset={active.preset} img={active.img} height={46} /></div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
                 <span className="kdot" style={{ width: 7, height: 7, borderRadius: 9, background: K.goldSoft }} />
                 <span style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 11, color: K.goldSoft }}>En livraison · 12 min</span>
               </div>
-              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: '#fff' }}>Buffet Mystère du Soir</div>
+              <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{active.title}</div>
               <div style={{ fontFamily: FONT_BODY, fontSize: 11.5, color: 'rgba(255,255,255,0.6)' }}>Moussa · Yamaha · +227 90 ••</div>
             </div>
-            <button style={{ width: 40, height: 40, borderRadius: 12, border: 'none', background: K.goldSoft, color: K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <button aria-label="Appeler le livreur" style={{ width: 40, height: 40, borderRadius: 12, border: 'none', background: K.goldSoft, color: K.forest, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
               <Icon name="phone" size={20} stroke={2.2} />
             </button>
           </div>
         </div>
       </div>
+      )}
 
       {/* history */}
+      {history.length > 0 && (
       <div style={{ padding: '0 18px' }}>
         <SectionHead kicker="Historique" title="Commandes passées" accent={K.forest} icon="receipt" />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {PAST_ORDERS.map((o) => (
+          {history.map((o) => (
             <div key={o.id} style={{ display: 'flex', alignItems: 'center', gap: 13, background: K.paper, border: `1px solid ${K.hair}`, borderRadius: 16, padding: 11 }}>
               <div style={{ width: 52, height: 52, borderRadius: 12, overflow: 'hidden', flexShrink: 0 }}><FoodImg preset={o.preset} img={o.img} height={52} /></div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -886,12 +1050,15 @@ export function OrdersScreen() {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 13, color: K.ink }}>{fcfa(o.total)}</div>
-                <button style={{ border: 'none', background: 'none', padding: 0, marginTop: 2, cursor: 'pointer', fontFamily: FONT_BODY, fontWeight: 700, fontSize: 10.5, color: K.forest }}>Recommander</button>
+                {findOffer(o.offerId) && (
+                  <button onClick={() => reorder(o)} style={{ border: 'none', background: 'none', padding: 0, marginTop: 2, cursor: 'pointer', fontFamily: FONT_BODY, fontWeight: 700, fontSize: 10.5, color: K.forest }}>Recommander</button>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -42,8 +42,9 @@ export const FONT_BODY = "'Plus Jakarta Sans', system-ui, sans-serif";
 export const FONT_MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
 // ── Icons (24×24, stroke = currentColor) ──────────────────────
-export function Icon({ name, size = 22, stroke = 1.8, fill = 'none', style = {} }) {
-  const p = { fill: 'none', stroke: 'currentColor', strokeWidth: stroke, strokeLinecap: 'round', strokeLinejoin: 'round' };
+// `filled` fills the glyph with currentColor (heart/star « on » states).
+export function Icon({ name, size = 22, stroke = 1.8, fill = 'none', filled = false, style = {} }) {
+  const p = { fill: filled ? 'currentColor' : 'none', stroke: 'currentColor', strokeWidth: stroke, strokeLinecap: 'round', strokeLinejoin: 'round' };
   const paths = {
     pin: <><path {...p} d="M12 21c4-4.5 7-8 7-11a7 7 0 1 0-14 0c0 3 3 6.5 7 11Z"/><circle {...p} cx="12" cy="10" r="2.4"/></>,
     search: <><circle {...p} cx="11" cy="11" r="6.5"/><path {...p} d="M20 20l-3.5-3.5"/></>,

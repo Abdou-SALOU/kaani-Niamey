@@ -46,6 +46,34 @@ body {
   }
 }
 
+/* Product grids: 2-up by default (phone), auto-fill on desktop. */
+.kgrid { display: grid; grid-template-columns: 1fr 1fr; }
+
+/* On desktop (≥1024px) the app becomes a full-window layout with a left
+   sidebar instead of the centred phone frame. */
+@media (min-width: 1024px) {
+  #root { align-items: stretch; }
+  .kaani-shell.is-desktop {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+  }
+  /* content column stays readable on very wide screens */
+  .is-desktop .kpage {
+    max-width: 1120px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  /* product grids breathe into as many columns as fit */
+  .is-desktop .kgrid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+}
+
 /* hide scrollbars on horizontal rails + the vertical app scroll */
 .hscroll::-webkit-scrollbar { display: none; }
 .hscroll { -ms-overflow-style: none; scrollbar-width: none; }

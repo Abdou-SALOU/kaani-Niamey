@@ -1,20 +1,67 @@
 // ── Kaani · App shell — routing, bottom nav, responsive frame ──
 import React from 'react';
-import { K, Icon, FONT_BODY } from './ds.jsx';
+import { K, Icon, FONT_BODY, Wordmark } from './ds.jsx';
 import {
   HomeScreen, SearchScreen, OrdersScreen, ProfileScreen, PartnerScreen,
-  DetailScreen, PaymentScreen, ConfirmScreen,
+  DetailScreen, PaymentScreen, ConfirmScreen, FavoritesScreen,
 } from './screens.jsx';
 
-// Bottom navigation
+// Navigation items shared by the mobile bottom bar and the desktop sidebar.
+const NAV_ITEMS = [
+  { id: 'home', icon: 'home', label: 'Accueil' },
+  { id: 'search', icon: 'search', label: 'Recherche' },
+  { id: 'orders', icon: 'receipt', label: 'Commandes' },
+  { id: 'partner', icon: 'store', label: 'Partenaire' },
+  { id: 'profile', icon: 'user', label: 'Profil' },
+];
+
+// True when the viewport is wide enough for the desktop sidebar layout.
+// Kept in sync with the `@media (min-width: 1024px)` rules in styles.css.
+function useIsDesktop() {
+  const query = '(min-width: 1024px)';
+  const [isDesktop, setIsDesktop] = React.useState(
+    () => typeof window !== 'undefined' && window.matchMedia(query).matches,
+  );
+  React.useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = () => setIsDesktop(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return isDesktop;
+}
+
+// Desktop sidebar navigation (replaces the bottom bar on wide screens).
+function SideNav({ tab, onTab }) {
+  return (
+    <aside style={{ width: 248, flexShrink: 0, height: '100%', background: K.paper,
+      borderRight: `1px solid ${K.hair}`, display: 'flex', flexDirection: 'column', padding: '26px 16px' }}>
+      <div style={{ padding: '0 10px 24px' }}><Wordmark size={26} /></div>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {NAV_ITEMS.map((it) => {
+          const on = tab === it.id;
+          return (
+            <button key={it.id} onClick={() => onTab(it.id)} style={{ display: 'flex', alignItems: 'center', gap: 13,
+              padding: '12px 14px', borderRadius: 14, border: 'none', cursor: 'pointer', textAlign: 'left',
+              background: on ? K.freshWash : 'transparent', color: on ? K.forest : K.ink2,
+              fontFamily: FONT_BODY, fontWeight: on ? 700 : 600, fontSize: 14.5 }}>
+              <Icon name={it.icon} size={21} stroke={on ? 2.3 : 2} />
+              {it.label}
+            </button>
+          );
+        })}
+      </nav>
+      <div style={{ marginTop: 'auto', background: K.cream, border: `1px solid ${K.hair}`, borderRadius: 16, padding: '14px 15px' }}>
+        <div style={{ fontFamily: FONT_BODY, fontWeight: 700, fontSize: 12.5, color: K.ink, marginBottom: 3 }}>Kaani sur mobile</div>
+        <div style={{ fontFamily: FONT_BODY, fontSize: 11, lineHeight: 1.45, color: K.muted }}>Installez l’app pour commander en 1 geste, même hors-ligne.</div>
+      </div>
+    </aside>
+  );
+}
+
+// Bottom navigation (mobile)
 function BottomNav({ tab, onTab }) {
-  const items = [
-    { id: 'home', icon: 'home', label: 'Accueil' },
-    { id: 'search', icon: 'search', label: 'Recherche' },
-    { id: 'orders', icon: 'receipt', label: 'Commandes' },
-    { id: 'partner', icon: 'store', label: 'Partenaire' },
-    { id: 'profile', icon: 'user', label: 'Profil' },
-  ];
+  const items = NAV_ITEMS;
   return (
     <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 40,
       paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)', paddingTop: 8,
@@ -43,6 +90,7 @@ function BottomNav({ tab, onTab }) {
 
 export default function App() {
   const mysteryVariant = 'flou'; // signature "Hôtel Mystère" treatment
+  const isDesktop = useIsDesktop();
 
   const [tab, setTab] = React.useState('home');
   const [route, setRoute] = React.useState(null); // overlay flow
@@ -54,33 +102,40 @@ export default function App() {
   const openOffer = (offer) => go({ name: 'detail', offer });
   const order = (offer, qty) => go({ name: 'payment', cart: { offer, qty } });
   const confirm = (cart, pay, total) => go({ name: 'confirm', cart, pay, total });
+  const openFavorites = () => go({ name: 'favorites' });
 
   // tab content
   let tabScreen;
-  if (tab === 'home') tabScreen = <HomeScreen onOpen={openOffer} onSearch={() => goTab('search')} onPartner={() => goTab('partner')} mysteryVariant={mysteryVariant} />;
+  if (tab === 'home') tabScreen = <HomeScreen onOpen={openOffer} onSearch={() => goTab('search')} onPartner={() => goTab('partner')} onFavorites={openFavorites} mysteryVariant={mysteryVariant} />;
   else if (tab === 'search') tabScreen = <SearchScreen onOpen={openOffer} mysteryVariant={mysteryVariant} />;
-  else if (tab === 'orders') tabScreen = <OrdersScreen />;
+  else if (tab === 'orders') tabScreen = <OrdersScreen onOpen={openOffer} />;
   else if (tab === 'partner') tabScreen = <PartnerScreen embedded />;
-  else if (tab === 'profile') tabScreen = <ProfileScreen onOpenOrder={() => goTab('orders')} onPartner={() => goTab('partner')} />;
+  else if (tab === 'profile') tabScreen = <ProfileScreen onOpenOrder={() => goTab('orders')} onPartner={() => goTab('partner')} onFavorites={openFavorites} />;
 
   // overlay content
   let overlay = null;
   if (route?.name === 'detail') overlay = <DetailScreen offer={route.offer} mysteryVariant={mysteryVariant} onBack={() => setRoute(null)} onOrder={order} />;
   else if (route?.name === 'payment') overlay = <PaymentScreen cart={route.cart} onBack={() => go({ name: 'detail', offer: route.cart.offer })} onConfirm={confirm} />;
   else if (route?.name === 'confirm') overlay = <ConfirmScreen cart={route.cart} pay={route.pay} total={route.total} onTrack={() => goTab('orders')} onHome={() => goTab('home')} />;
+  else if (route?.name === 'favorites') overlay = <FavoritesScreen onBack={() => setRoute(null)} onOpen={openOffer} mysteryVariant={mysteryVariant} />;
+
+  // Tab content clears the bottom bar on mobile; on desktop the sidebar
+  // frees that space, so a normal bottom padding is enough.
+  const tabPadBottom = isDesktop ? 28 : 'calc(96px + env(safe-area-inset-bottom, 0px))';
 
   return (
-    <div className="kaani-shell">
-      <div style={{ width: '100%', height: '100%', position: 'relative', background: K.cream, fontFamily: FONT_BODY, color: K.ink }}>
+    <div className={`kaani-shell${isDesktop ? ' is-desktop' : ''}`}>
+      {isDesktop && <SideNav tab={tab} onTab={goTab} />}
+      <div className="kmain" style={{ position: 'relative', flex: 1, minWidth: 0, height: '100%', background: K.cream, fontFamily: FONT_BODY, color: K.ink }}>
         {/* scroll region */}
         <div ref={scrollRef} className="kscroll" style={{ position: 'absolute', inset: 0, overflowY: 'auto', overflowX: 'hidden', background: K.cream }}>
           {overlay
-            ? <div key={route.name} className="kover" style={{ minHeight: '100%' }}>{overlay}</div>
-            : <div key={tab} className="kfade" style={{ minHeight: '100%', paddingBottom: 'calc(96px + env(safe-area-inset-bottom, 0px))' }}>{tabScreen}</div>}
+            ? <div key={route.name} className="kover kpage" style={{ minHeight: '100%' }}>{overlay}</div>
+            : <div key={tab} className="kfade kpage" style={{ minHeight: '100%', paddingBottom: tabPadBottom }}>{tabScreen}</div>}
         </div>
 
-        {/* bottom nav only on tabs */}
-        {!overlay && <BottomNav tab={tab} onTab={goTab} />}
+        {/* bottom nav only on tabs (mobile/tablet) */}
+        {!isDesktop && !overlay && <BottomNav tab={tab} onTab={goTab} />}
       </div>
     </div>
   );
